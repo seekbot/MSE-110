@@ -8,10 +8,11 @@
 
 /* Function Definitions */
 // stop motors
+int speedA = 50;
 void stopMotors()
 {
 	nMotorEncoder[motorA] = 0;
-	int speedA = 50;
+	
 
 	while (nMotorEncoder[motorA] <= 360)
 	{
@@ -40,9 +41,9 @@ void stop10()
 			twoSecBeep();
 			// stop the motors
 			stopMotors();
-			// if line BLUE - turn 180 degrees
-			break;
 			// if line GREEN - Remove obstacle
+		
+			
 		}
 		else
 		{
@@ -50,9 +51,53 @@ void stop10()
 		}
 	}
 }
+void regline()
+{
+	
+}
+void greenline()
+{
+	//if obstacle detected, extra motor swipes it off the track -- Using motor C
+	//requires 10cm scoop
+	if(getUSDistance(US)<=10)
+	{
+		//set arm speed
+		int armSpeed=30;
+		nMotorEncoder[motorC]=0;
+		//motorized arm turns 180 degrees to swipe the obstacle away
+		while(nMotorEncoder[motorC]<=180)
+		{
+			motor[motorC]=armSpeed;
+		}
+		//motorized arm moves back into position
+		while(nMotorEncoder[motorC]<=0)
+		{
+			motor[motorC]=-armSpeed;	
+		}
+	}
+}
+void blueline()
+{
+	//Using "one faster wheel" method from lab script. May make bot go off center once fully turned
 
+	if(getColorName(CS)==colorBlue)
+	{
+		//aboutTurn variable needs to be set to the degrees the A motor needs to turn in order to complete the 180 turn. Until the bot is built, 360 is used.
+		int aboutTurn= 360;
+		//reset motor encoder
+		nMotorEncoder[motorA]=0;
+		nMotorEncoder[motorB]=0;
+		//while the motor encoder reads a value less than aboutTurn
+		while(nMotorEncoder[motorA]<=aboutTurn)
+		{
+			motor[motorA]=speedA;
+			motor[motorB]=2*speedA;
+		}
+	}
+}
 /* main function */
 task main()
 {
-	stop10();
+	
+	blueline();
 }
