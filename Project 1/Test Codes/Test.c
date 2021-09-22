@@ -10,13 +10,12 @@
 int speedA = 50;
 
 /* Function List */
-void stopMotors();	// stop motors
-void twoSecBeep();	// Beeping for 2 sec
-void stop10();	// stop 10cm b4 obstacle
+void stopMotors(); // stop motors
+void twoSecBeep(); // Beeping for 2 sec
+void stop10();	   // stop 10cm b4 obstacle
 //void regline();	// REGULAR/BLACK line
 //void greenline();	// GREEN line
 //void blueline();	// BLUE line
-
 
 /* main function */
 task main()
@@ -58,8 +57,6 @@ void stop10()
 			// stop the motors
 			stopMotors();
 			// if line GREEN - Remove obstacle
-
-
 		}
 		else
 		{
