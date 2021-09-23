@@ -12,10 +12,65 @@ Our bot:
 left wheel - Port 'A' and right wheel  - Port 'D'.
 Sonar sensor - Port '1' and Color Sensor - Port '4'*/
 
-/* Global Var. */
-int wheelSpeed = 50;
+/*Global Variables*/
+int wheelSpeed;
 
-/* functions */
+/* Function List */
+void colourDetect();
+void motorControl();
+void twoSecBeep();
+void stop10();
+
+/* main func */
+task main()
+{
+	while(true){
+		stop10();
+		colourDetect();
+		motorControl();
+
+	}
+}
+
+/* Function Def. */
+// Colour Detection
+void colourDetect(){
+	int colourVal;
+	while (true){
+		colourVal = getColorName(CS); // setup the sensor's name and input jack accordingly
+
+		if(colourVal == 3)
+					{
+						displayCenteredBigTextLine(1, "%s,%d","green", colourVal);
+						// return colourVal;
+					}
+					else if(colourVal == 2)
+					{
+						displayCenteredBigTextLine(1, "%s,%d","blue", colourVal);
+						// return colourVal;
+					}
+					else
+					{
+						displayCenteredBigTextLine(1, "%s,%d","other", colourVal);
+						// return colourVal;
+					}
+		}
+}
+
+// Motor Adjustment
+void motorControl()
+{
+	// Reset the encoder to 0
+	nMotorEncoder[motorA] = 0;
+	nMotorEncoder[motorD] = 0;
+
+	while (true)
+	{
+		motor[motorA] = 10;
+		motor[motorD] = 10;
+	}
+}
+
 // Beeping for 2 sec
 void twoSecBeep()
 {
@@ -40,10 +95,4 @@ void stop10()
 			break;
 		}
 	}
-}
-
-/* main function */
-task main()
-{
-	stop10();
 }
