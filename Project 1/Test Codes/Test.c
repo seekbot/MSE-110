@@ -10,19 +10,15 @@
 int speedA = 50;
 
 /* Function List */
-void stopMotors(); // stop motors
-void twoSecBeep(); // Beeping for 2 sec
-void stop10();	   // stop 10cm b4 obstacle
+//void stopMotors(); // stop motors
+//void twoSecBeep(); // Beeping for 2 sec
+//void stop10();	   // stop 10cm b4 obstacle
 //void regline();	// REGULAR/BLACK line
 //void greenline();	// GREEN line
 //void blueline();	// BLUE line
 
 /* main function */
-task main()
-{
-	//blueline();
-	stop10();
-}
+
 
 /* Function Definitions */
 // stop motors
@@ -46,23 +42,21 @@ void twoSecBeep()
 }
 
 // stop 10cm b4 obstacle
-void stop10()
+bool stop10()
 {
-	while (true)
-	{
-		int dist = getUSDistance(US);
+	int dist = getUSDistance(US);
 		if (dist <= 10)
 		{
 			twoSecBeep();
 			// stop the motors
-			stopMotors();
+			//stopMotors(); //may need to change
 			// if line GREEN - Remove obstacle
+			return true;
 		}
 		else
 		{
-			continue;
+			return false;
 		}
-	}
 }
 
 // REGULAR/BLACK line
@@ -95,12 +89,10 @@ void stop10()
 }*/
 
 // BLUE line
-/*void blueline()
+void blueline()
 {
 	//Using "one faster wheel" method from lab script. May make bot go off center once fully turned
 
-	if(getColorName(CS)==colorBlue)
-	{
 		//aboutTurn variable needs to be set to the degrees the A motor needs to turn in order to complete the 180 turn. Until the bot is built, 360 is used.
 		int aboutTurn= 360;
 		//reset motor encoder
@@ -112,5 +104,37 @@ void stop10()
 			motor[motorA]=speedA;
 			motor[motorB]=2*speedA;
 		}
+}
+task main()
+{
+	while(true)
+	{
+			if(getColorName(CS)==colorGreen)
+			{
+				//if no item detected, but still on green line, continue moving along path
+			bool obstacleDetected=stop10();
+				while(obstacleDetected==true)
+				{
+					motor[motorA]=speedA;
+					motor[motorB]=speedA;
+				}
+				//if item detected, run obstacle removal
+
+			}
+			else if(getColorName(CS)==colorBlue)
+			{
+				//run blueline function
+				blueline();
+			}
+			else
+			{
+				//continue turning until line is found again
+				while(getColorName(CS)!=colorBlue&&getColorName(CS)!=colorGreen)
+				{
+					motor[motorA]=speedA/2;
+					motor[motorB]=2*speedA;
+				}
+			}
+			wait1Msec(100);
 	}
-}*/
+}
