@@ -17,12 +17,12 @@ void colourDetect(){
 	while (true){
 		colourVal = getColorName(CS); // setup the sensor's name and input jack accordingly
 
-		if(colourVal == 3)
+		if(colourVal == colorGreen)
 					{
 						displayCenteredBigTextLine(1, "%s,%d","green", colourVal);
 						//return colourVal;
 					}
-					else if(colourVal == 2)
+					else if(colourVal == colorBlue)
 					{
 						displayCenteredBigTextLine(1, "%s,%d","blue", colourVal);
 						//return colourVal;
