@@ -27,41 +27,45 @@ task main()
 	nMotorEncoder[rightWheel] = 0;
 
 	while (true)
-	{	// obstacle scenario
-		if(getColorName(CS)==colorGreen)
+	{
+
+		if (getUSDistance(US) <= 10)
 		{
-			if (getUSDistance(US) <= 10)
+			//obstacle scenario for green line
+			if(getColorName(CS)==colorGreen)
 			{
 				// bot stops
 				setMotorSpeed(leftWheel, 0);
 				setMotorSpeed(rightWheel, 0);
 
 				twoSecBeep();	// beeps for 2 sec
+				while(getUSDistance(US)>=5)
 				{
-					while(getUSDistance(US)>=5)
-					{
-						setMotorSpeed(leftWheel, 10);
-						setMotorSpeed(rightWheel,10);
-					}
-					while (getUSDistance(US) < 5)
-					{
-						moveMotorTarget(armMotor, 40, -50); // arms down
-						sleep(2000);
-						moveMotorTarget(armMotor, -80, -50); // arms up
-						sleep(2000);
-					}
+					setMotorSpeed(leftWheel, 10);
+					setMotorSpeed(rightWheel,10);
+				}
+				while (getUSDistance(US) < 5)
+				{
+					moveMotorTarget(armMotor, 40, -50); // arms down
+					sleep(2000);
+					moveMotorTarget(armMotor, -80, -50); // arms up
+					sleep(2000);
 				}
 			}
+			//obstacle scenario for blue line
+			if((getColorName(CS)==colorBlack)||(getColorName(CS)==colorBlue))
+			{
+				moveMotorTarget(leftWheel, -680, 25);  //vars: motor index, position and speed
+				moveMotorTarget(rightWheel, 680, 25);
+			}
+		}
+		//if on color, but no obstacle, continue running
+		else if((getColorName(CS)==colorBlue)||(getColorName(CS)==colorGreen)||(getColorName(CS)==colorBlack))
+		{
 			setMotorSpeed(leftWheel, 45);
 			setMotorSpeed(rightWheel, 0);
 		}
-		// obstacle in blue line
-		else if((getColorName(CS) == colorBlue) || (getColorName(CS) == colorBlack))
-		{
-			moveMotorTarget(leftWheel, -680, 25);  //vars: motor index, position and speed
-			moveMotorTarget(rightWheel, -680, 25);
-
-		}
+		//if no color detected, turn
 		else
 		{
 			setMotorSpeed(leftWheel, 0);
@@ -74,9 +78,9 @@ task main()
 // 2 sec beep
 void twoSecBeep()
 {
-for (int i = 1; i < 3; i++)
-{
-	playSoundFile("Error alarm");
-	sleep(1000);
-}
+	for (int i = 1; i < 3; i++)
+	{
+		playSoundFile("Error alarm");
+		sleep(1000);
+	}
 }
