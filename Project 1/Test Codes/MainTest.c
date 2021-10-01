@@ -28,34 +28,41 @@ task main()
 
 	while (true)
 	{	// obstacle scenario
-		if (getUSDistance(US) <= 10)
+		if(getColorName(CS)==colorGreen)
 		{
-			// bot stops
-			setMotorSpeed(leftWheel, 0);
-			setMotorSpeed(rightWheel, 0);
-
-			twoSecBeep();	// beeps for 2 sec
-			while(getUSDistance(US)>=5)
+			if (getUSDistance(US) <= 10)
 			{
-				setMotorSpeed(leftWheel, 10);
-				setMotorSpeed(rightWheel,10);
-			}
-			while (getUSDistance(US) < 5)
+				// bot stops
+				setMotorSpeed(leftWheel, 0);
+				setMotorSpeed(rightWheel, 0);
+
+				twoSecBeep();	// beeps for 2 sec
 				{
-							moveMotorTarget(armMotor, 40, -50); // arms down
-							sleep(2000);
-							moveMotorTarget(armMotor, -80, -50); // arms up
-							sleep(2000);
+					while(getUSDistance(US)>=5)
+					{
+						setMotorSpeed(leftWheel, 10);
+						setMotorSpeed(rightWheel,10);
+					}
+					while (getUSDistance(US) < 5)
+					{
+						moveMotorTarget(armMotor, 40, -50); // arms down
+						sleep(2000);
+						moveMotorTarget(armMotor, -80, -50); // arms up
+						sleep(2000);
+					}
 				}
 			}
-
-		// line tracking
-		if ((getColorName(CS) == colorBlack) || (getColorName(CS) == colorGreen))
-		{
 			setMotorSpeed(leftWheel, 45);
 			setMotorSpeed(rightWheel, 0);
 		}
-		else if ((getColorName(CS) != colorBlack) || (getColorName(CS) != colorGreen))
+		// obstacle in blue line
+		else if((getColorName(CS) == colorBlue) || (getColorName(CS) == colorBlack))
+		{
+			moveMotorTarget(leftWheel, -680, 25);  //vars: motor index, position and speed
+			moveMotorTarget(rightWheel, -680, 25);
+
+		}
+		else
 		{
 			setMotorSpeed(leftWheel, 0);
 			setMotorSpeed(rightWheel, 45);
@@ -67,9 +74,9 @@ task main()
 // 2 sec beep
 void twoSecBeep()
 {
-	for (int i = 1; i < 3; i++)
-	{
-		playSoundFile("Error alarm");
-		sleep(1000);
-	}
+for (int i = 1; i < 3; i++)
+{
+	playSoundFile("Error alarm");
+	sleep(1000);
+}
 }
