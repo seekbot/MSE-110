@@ -17,7 +17,7 @@ Sonar sensor - Port '1' and Color Sensor - Port '4'*/
 /* Function List */
 void twoSecBeep();	 // 2 sec beep
 //void stop10();		 // stop 10 cm b4 obj
-//void lineTracking(); // move while tracking line
+void lineTracking(); // move while tracking line
 
 /* main func */
 task main()
@@ -60,17 +60,7 @@ task main()
 			}
 		}
 		//if on color, but no obstacle, continue running
-		else if((getColorName(CS)==colorBlue)||(getColorName(CS)==colorGreen)||(getColorName(CS)==colorBlack))
-		{
-			setMotorSpeed(leftWheel, 45);
-			setMotorSpeed(rightWheel, 0);
-		}
-		//if no color detected, turn
-		else
-		{
-			setMotorSpeed(leftWheel, 0);
-			setMotorSpeed(rightWheel, 45);
-		}
+		lineTracking();
 	}
 }
 
@@ -82,5 +72,23 @@ void twoSecBeep()
 	{
 		playSoundFile("Error alarm");
 		sleep(1000);
+	}
+}
+
+void lineTracking()
+{
+	while(true)
+	{
+		if((getColorName(CS)==colorBlue)||(getColorName(CS)==colorGreen)||(getColorName(CS)==colorBlack))
+		{
+			setMotorSpeed(leftWheel, 45);
+			setMotorSpeed(rightWheel, 0);
+		}
+		//if no color detected, turn
+		else
+		{
+			setMotorSpeed(leftWheel, 0);
+			setMotorSpeed(rightWheel, 45);
+		}
 	}
 }
