@@ -27,39 +27,29 @@ task main()
 	nMotorEncoder[rightWheel] = 0;
 
 	while (true)
-	{
-
+	{	// obstacle scenario
 		if (getUSDistance(US) <= 10)
 		{
-			//obstacle scenario for green line
-			if(getColorName(CS)==colorGreen)
-			{
-				// bot stops
-				setMotorSpeed(leftWheel, 0);
-				setMotorSpeed(rightWheel, 0);
+			// bot stops
+			setMotorSpeed(leftWheel, 0);
+			setMotorSpeed(rightWheel, 0);
 
-				twoSecBeep();	// beeps for 2 sec
-				while(getUSDistance(US)>=5)
-				{
-					setMotorSpeed(leftWheel, 10);
-					setMotorSpeed(rightWheel,10);
-				}
-				while (getUSDistance(US) < 5)
-				{
-					moveMotorTarget(armMotor, 40, -50); // arms down
-					sleep(2000);
-					moveMotorTarget(armMotor, -80, -50); // arms up
-					sleep(2000);
-				}
-			}
-			//obstacle scenario for blue line
-			if((getColorName(CS)==colorBlack)||(getColorName(CS)==colorBlue))
+			twoSecBeep();	// beeps for 2 sec
+			while(getUSDistance(US)>=5)
 			{
-				moveMotorTarget(leftWheel, -680, 25);  //vars: motor index, position and speed
-				moveMotorTarget(rightWheel, 680, 25);
+				setMotorSpeed(leftWheel, 10);
+				setMotorSpeed(rightWheel,10);
+			}
+			while (getUSDistance(US) < 5)
+			{
+				moveMotorTarget(armMotor, 40, -50); // arms down
+				sleep(2000);
+				moveMotorTarget(armMotor, -80, -50); // arms up
+				sleep(2000);
 			}
 		}
-		//if on color, but no obstacle, continue running
+
+		// line tracking
 		lineTracking();
 	}
 }
