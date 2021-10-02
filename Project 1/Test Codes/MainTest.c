@@ -126,9 +126,9 @@ void turnAround()
 {
 	resetEncoders();
 
-	while (nMotorEncoder[leftWheel] < 300)
+	while (nMotorEncoder[leftWheel] < 300) // turns counterclockwise from above
 	{
-		setMotorSpeed(leftWheel, 30);
-		setMotorSpeed(rightWheel, -30);
+		setMotorSpeed(leftWheel, -30);
+		setMotorSpeed(rightWheel, 30);
 	}
 }
