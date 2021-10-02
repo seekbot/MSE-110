@@ -12,8 +12,6 @@ Our bot:
 left wheel - Port 'A' and right wheel  - Port 'D'.
 Sonar sensor - Port '1' and Color Sensor - Port '4'*/
 
-/*Global Variables*/
-
 /* Function List */
 void resetEncoders(); // set motor encoders in wheels to 0
 void twoSecBeep();	  // 2 sec beep
@@ -25,8 +23,6 @@ void turnAround();	  // turns around 180 deg for obstacle in blue line
 /* main func */
 task main()
 {
-	resetEncoders();
-
 	while (true)
 	{
 		// obstacle scenario
@@ -41,9 +37,9 @@ task main()
 				{
 					setMotorSpeed(leftWheel, 10); // move closer towards the obstacle
 					setMotorSpeed(rightWheel, 10);
-
-					moveObstacle(); // move obstacle
 				}
+				stopWheels();
+				moveObstacle(); // move obstacle
 			}
 
 			else if ((SensorValue[CS] > 3) && (SensorValue[CS] <= 7)) //blue line - subject to change light intensity range
