@@ -124,9 +124,7 @@ void moveObstacle()
 // turns around 180 deg for obstacle in blue line
 void turnAround()
 {
-	resetEncoders();
-
-	while (nMotorEncoder[leftWheel] < 300) // turns counterclockwise from above
+	while (SensorValue[CS] >= 10) // turns counterclockwise from above
 	{
 		setMotorSpeed(leftWheel, -30);
 		setMotorSpeed(rightWheel, 30);
