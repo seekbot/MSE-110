@@ -25,8 +25,12 @@ task main()
 {
 	while (true)
 	{
+		// display light intensity
+		displayBigTextLine(1, "Light: %d", getColorReflected(CS));
+		sleep(250);
+
 		// obstacle scenario
-		if (getUSDistance(US) <= 10)
+		if (SensorValue[US] <= 10)
 		{
 			stopWheels(); // bot stops
 			twoSecBeep(); // beeps for 2 sec
@@ -58,7 +62,7 @@ void lineTracking()
 {
 
 	// color detected
-	if (SensorValue[CS] <= 10)
+	if ((SensorValue[CS] >= 14) && (SensorValue[CS] <= 23))
 	{
 		setMotorSpeed(leftWheel, 45);
 		setMotorSpeed(rightWheel, 25);
