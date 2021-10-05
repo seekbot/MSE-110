@@ -12,6 +12,14 @@ Our bot:
 left wheel - Port 'A' and right wheel  - Port 'D'.
 Sonar sensor - Port '1' and Color Sensor - Port '4'*/
 
+/* Global Var */
+int greenMin = 10;
+int greenMax = 15;
+int blueMin = 6;
+int blueMax = 14;
+
+int bgColour = 35;
+
 /* Function List */
 void resetEncoders(); // set motor encoders in wheels to 0
 void twoSecBeep();	  // 2 sec beep
@@ -27,31 +35,41 @@ task main()
 	{
 		// display light intensity
 		displayBigTextLine(1, "Light: %d", getColorReflected(CS));
-		sleep(250);
 
 		// obstacle scenario
 		if (SensorValue[US] <= 10)
 		{
 			stopWheels(); // bot stops
 			twoSecBeep(); // beeps for 2 sec
+			displayBigTextLine(1, "Light: %d", getColorReflected(CS));
 
-			if ((SensorValue[CS] > 7) && (SensorValue[CS] <= 10)) //green line - subject to change light intensity range
+			if ((SensorValue[CS] > greenMin) && (SensorValue[CS] <= greenMax)) //green line - subject to change light intensity range
 			{
-				while (getUSDistance(US) >= 5)
+				while (SensorValue[US] >= 3)
 				{
-					setMotorSpeed(leftWheel, 10); // move closer towards the obstacle
-					setMotorSpeed(rightWheel, 10);
+					setMotorSpeed(leftWheel, 30);
+					setMotorSpeed(rightWheel, 30);
 				}
+
 				stopWheels();
+
 				moveObstacle(); // move obstacle
 			}
 
-			else if ((SensorValue[CS] > 3) && (SensorValue[CS] <= 7)) //blue line - subject to change light intensity range
+			else if ((SensorValue[CS] >= blueMin) && (SensorValue[CS] < greenMin)) //blue line - subject to change light intensity range
 			{
 				turnAround(); // turn 180 deg
 			}
+			else
+			{
+				while(SensorValue[CS] >= GreenMax)
+				{
+					setMotorSpeed(leftWheel, 0);
+					setMotorSpeed(rightWheel, 5);
+				}
+				stopWheels();
+			}
 		}
-
 		lineTracking(); // detect line
 	}
 }
@@ -60,21 +78,55 @@ task main()
 // move while detecting line
 void lineTracking()
 {
-
-	// color detected
-	if ((SensorValue[CS] >= 14) && (SensorValue[CS] <= 23))
-	{
-		setMotorSpeed(leftWheel, 45);
-		setMotorSpeed(rightWheel, 25);
-	}
-	//if no color detected, turn
-	else
+	// bot move right
+	if ((SensorValue[CS] >= blueMin) && (SensorValue[CS] <= greenMax))
 	{
 		setMotorSpeed(leftWheel, 25);
-		setMotorSpeed(rightWheel, 45);
+		setMotorSpeed(rightWheel, 15);
+	}
+	// bot move left
+	else if ((SensorValue[CS] >= 20) && (SensorValue[CS] < bgColour))
+	{
+		setMotorSpeed(leftWheel, 15);
+		setMotorSpeed(rightWheel, 25);
+	}
+	// 90 deg turn
+	else if (SensorValue[CS] >= bgColour)
+	{
+		int a = 0;
+		stopWheels();
+		resetEncoders();
+
+		while ((nMotorEncoder(rightWheel)< 180)) // 90 deg left
+		{
+			if (SensorValue[CS] <= greenMax)
+			{
+				a++;
+				break;
+			}
+
+			setMotorSpeed(leftWheel, -5);
+			setMotorSpeed(rightWheel, 5);
+		}
+
+		stopWheels();
+		resetEncoders();
+
+		while ((nMotorEncoder(leftWheel) < 360) && (a != 1)) // 180 deg clockwise
+		{
+			if (SensorValue[CS] <= greenMax) // detects line
+			{
+				stopWheels();
+				resetEncoders();
+				setMotorTarget(leftWheel, 170, 5); // bot turns right 45 deg
+				waitUntilMotorStop(leftWheel);
+				break;
+			}
+			setMotorSpeed(leftWheel, 5);
+			setMotorSpeed(rightWheel, -5);
+		}
 	}
 }
-
 // set motor encoders to 0
 void resetEncoders()
 {
@@ -85,8 +137,8 @@ void resetEncoders()
 // set wheel speed to 0
 void stopWheels()
 {
-	motor[leftWheel] = 0;
-	motor[rightWheel] = 0;
+	setMotorSpeed(leftWheel,0);
+	setMotorSpeed(rightWheel,0);
 }
 
 // 2 sec beep
@@ -121,16 +173,19 @@ void moveObstacle()
 
 	stopWheels(); // stop moving
 
-	setMotorTarget(leftWheel, -113.3, 50); // bot turns left 30 deg (back to line)
+	setMotorTarget(leftWheel, 113.3, 50); // bot turns left 30 deg (back to line)
 	waitUntilMotorStop(leftWheel);
 }
 
 // turns around 180 deg for obstacle in blue line
 void turnAround()
 {
-	while (SensorValue[CS] >= 10) // turns counterclockwise from above
+	resetEncoders();
+
+	while (nMotorEncoder[leftWheel] < 360)
 	{
-		setMotorSpeed(leftWheel, -30);
-		setMotorSpeed(rightWheel, 30);
+		setMotorSpeed(leftWheel, 30);
+		setMotorSpeed(rightWheel, -30);
 	}
+	stopWheels();
 }
