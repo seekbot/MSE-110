@@ -84,7 +84,7 @@ void lineTracking()
 		setMotorSpeed(rightWheel, 15);
 	}
 	// bot move left (outside of colour range)
-	else if ((SensorValue[CS] >= 20) && (SensorValue[CS] < bgColour))
+	else if ((SensorValue[CS] >= greenMax) && (SensorValue[CS] < bgColour))
 	{
 		setMotorSpeed(leftWheel, 15);
 		setMotorSpeed(rightWheel, 25);
