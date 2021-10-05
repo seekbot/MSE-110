@@ -13,12 +13,15 @@ left wheel - Port 'A' and right wheel  - Port 'D'.
 Sonar sensor - Port '1' and Color Sensor - Port '4'*/
 
 /* Global Var */
-int greenMin = 10;
+int greenMin = 11;
 int greenMax = 15;
+
 int blueMin = 6;
-int blueMax = 14;
+int blueMax = 10;
 
 int bgColour = 35;
+
+int objectDistance = 10;
 
 /* Function List */
 void resetEncoders(); // set motor encoders in wheels to 0
@@ -33,25 +36,21 @@ task main()
 {
 	while (true)
 	{
-		// display light intensity
-		displayBigTextLine(1, "Light: %d", getColorReflected(CS));
-
 		lineTracking(); // detect line
+
 		// obstacle scenario
-		if (SensorValue[US] <= 10)
+		if (SensorValue[US] <= objectDistance)
 		{
 			stopWheels(); // bot stops
 			twoSecBeep(); // beeps for 2 sec
-			displayBigTextLine(1, "Light: %d", getColorReflected(CS));
 
-			if ((SensorValue[CS] > greenMin) && (SensorValue[CS] <= greenMax)) //green line - subject to change light intensity range
+			if ((SensorValue[CS] >= greenMin) && (SensorValue[CS] <= greenMax)) //green line - subject to change light intensity range
 			{
 				resetEncoders();
 				while ((SensorValue[US] >= 0) && (nMotorEncoder(leftWheel) < 300))
 				{
 					setMotorSpeed(leftWheel, 30);
 					setMotorSpeed(rightWheel, 30);
-
 				}
 
 				resetEncoders();
@@ -60,19 +59,15 @@ task main()
 				moveObstacle(); // move obstacle
 			}
 
-			else if ((SensorValue[CS] >= blueMin) && (SensorValue[CS] < greenMin)) //blue line - subject to change light intensity range
+			else if ((SensorValue[CS] >= blueMin) &&(SensorValue[CS] <= blueMax)) //blue line - subject to change light intensity range
 			{
 				turnAround(); // turn 180 deg
 			}
 
 			else
 			{
-				while(SensorValue[CS] >= greenMax)
-				{
-					setMotorSpeed(leftWheel, 0);
-					setMotorSpeed(rightWheel, 5);
-				}
-				stopWheels();
+				setMotorTarget(rightWheel, 18.9, 15); // bot turns left 5 deg
+				waitUntilMotorStop(rightWheel);
 			}
 		}
 	}
@@ -97,15 +92,15 @@ void lineTracking()
 	// 90 deg turn
 	else if (SensorValue[CS] >= bgColour)
 	{
-		int a = 0;
+		bool isLeftExist = false;
 		stopWheels();
 		resetEncoders();
 
-		while ((nMotorEncoder(rightWheel)< 180)) // 90 deg left
+		while ((nMotorEncoder(rightWheel) < 180)) // 90 deg left
 		{
 			if (SensorValue[CS] <= greenMax)
 			{
-				a++;
+				isLeftExist = true;
 				break;
 			}
 
@@ -116,7 +111,7 @@ void lineTracking()
 		stopWheels();
 		resetEncoders();
 
-		while ((nMotorEncoder(leftWheel) < 360) && (a != 1)) // 180 deg clockwise
+		while ((nMotorEncoder(leftWheel) < 360) && (isLeftExist == false)) // 180 deg clockwise
 		{
 			if (SensorValue[CS] <= greenMax) // detects line
 			{
@@ -141,8 +136,8 @@ void resetEncoders()
 // set wheel speed to 0
 void stopWheels()
 {
-	setMotorSpeed(leftWheel,0);
-	setMotorSpeed(rightWheel,0);
+	setMotorSpeed(leftWheel, 0);
+	setMotorSpeed(rightWheel, 0);
 }
 
 // 2 sec beep
