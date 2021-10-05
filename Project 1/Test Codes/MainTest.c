@@ -36,6 +36,7 @@ task main()
 		// display light intensity
 		displayBigTextLine(1, "Light: %d", getColorReflected(CS));
 
+		lineTracking(); // detect line
 		// obstacle scenario
 		if (SensorValue[US] <= 10)
 		{
@@ -45,12 +46,15 @@ task main()
 
 			if ((SensorValue[CS] > greenMin) && (SensorValue[CS] <= greenMax)) //green line - subject to change light intensity range
 			{
-				while (SensorValue[US] >= 3)
+				resetEncoders();
+				while ((SensorValue[US] >= 0) && (nMotorEncoder(leftWheel) < 300))
 				{
 					setMotorSpeed(leftWheel, 30);
 					setMotorSpeed(rightWheel, 30);
+
 				}
 
+				resetEncoders();
 				stopWheels();
 
 				moveObstacle(); // move obstacle
@@ -60,9 +64,10 @@ task main()
 			{
 				turnAround(); // turn 180 deg
 			}
+
 			else
 			{
-				while(SensorValue[CS] >= GreenMax)
+				while(SensorValue[CS] >= greenMax)
 				{
 					setMotorSpeed(leftWheel, 0);
 					setMotorSpeed(rightWheel, 5);
@@ -70,7 +75,6 @@ task main()
 				stopWheels();
 			}
 		}
-		lineTracking(); // detect line
 	}
 }
 
@@ -173,7 +177,7 @@ void moveObstacle()
 
 	stopWheels(); // stop moving
 
-	setMotorTarget(leftWheel, 113.3, 50); // bot turns left 30 deg (back to line)
+	setMotorTarget(leftWheel, -113.3, 50); // bot turns right 30 deg (back to line)
 	waitUntilMotorStop(leftWheel);
 }
 
