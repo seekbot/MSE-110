@@ -13,11 +13,11 @@ left wheel - Port 'A' and right wheel  - Port 'D'.
 Sonar sensor - Port '1' and Color Sensor - Port '4'*/
 
 /* Global Var */
-int greenMin = 11;
+int greenMin = 12;
 int greenMax = 15;
 
 int blueMin = 6;
-int blueMax = 10;
+int blueMax = 11;
 
 int bgColour = 35;
 
@@ -64,9 +64,9 @@ task main()
 				turnAround(); // turn 180 deg
 			}
 
-			else
+			else if ((SensorValue[CS] > greenMax) && (SensorValue[CS] <= bgColour))
 			{
-				setMotorTarget(rightWheel, 18.9, 15); // bot turns left 5 deg
+				setMotorTarget(rightWheel, 37.8, 15); // bot turns left 10 deg
 				waitUntilMotorStop(rightWheel);
 			}
 		}
@@ -77,26 +77,26 @@ task main()
 // move while detecting line
 void lineTracking()
 {
-	// bot move right
+	// bot move right (within colour range)
 	if ((SensorValue[CS] >= blueMin) && (SensorValue[CS] <= greenMax))
 	{
 		setMotorSpeed(leftWheel, 25);
 		setMotorSpeed(rightWheel, 15);
 	}
-	// bot move left
+	// bot move left (outside of colour range)
 	else if ((SensorValue[CS] >= 20) && (SensorValue[CS] < bgColour))
 	{
 		setMotorSpeed(leftWheel, 15);
 		setMotorSpeed(rightWheel, 25);
 	}
-	// 90 deg turn
-	else if (SensorValue[CS] >= bgColour)
+	// 90 deg right turn (if path exists to left)
+	else if (SensorValue[CS] > bgColour)
 	{
 		bool isLeftExist = false;
 		stopWheels();
 		resetEncoders();
 
-		while ((nMotorEncoder(rightWheel) < 180)) // 90 deg left
+		while ((nMotorEncoder(rightWheel) < 180)) // 90 deg left (if path exists to right)
 		{
 			if (SensorValue[CS] <= greenMax)
 			{
@@ -181,7 +181,7 @@ void turnAround()
 {
 	resetEncoders();
 
-	while (nMotorEncoder[leftWheel] < 360)
+	while (nMotorEncoder[leftWheel] < 300)
 	{
 		setMotorSpeed(leftWheel, 30);
 		setMotorSpeed(rightWheel, -30);
