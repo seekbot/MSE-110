@@ -26,10 +26,6 @@ reflection = int((green + bgColour) / 2) # light reflection btwn line and table
 LFPK = 2 # constant to speed up correction (trial-n-error)
 speed = 80 # bot/wheel speed
 
-sound = Sound()
-sound.play_file('') # find 'Error alarm.wav' directory
-
-
 # functions
 def lineTracking():
         correction = (reflection - cs.reflection()) * LFPK
@@ -37,7 +33,7 @@ def lineTracking():
 
 def twoSecBeep():
     for i in range(0,2):
-        sound.beep()
+        Sound.play('sounds/Error alarm.wav') # find 'Error alarm.wav' directory
         sleep(1) # sleep for 1 sec (repeats twice - 2s)
 
 # main func.
