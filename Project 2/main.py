@@ -1,20 +1,19 @@
+#!/usr/bin/env pybricks-micropython
+
 # libraries/imports
-import math
-import time
 from pybricks.ev3devices import *
 from pybricks.parameters import *
 from pybricks.tools import wait
 from pybricks.robotics import *
 from pybricks.media.ev3dev import SoundFile
-from ev3dev2.sound import Sound
+
 
 # Initializing motors/sensors
 leftWheel = Motor(Port.A)
 rightWheel = Motor(Port.D)
-robot = DriveBase(leftWheel,rightWheel,wheel_diameter = 55,axle_track = 145)
+robot = DriveBase(leftWheel,rightWheel,wheel_diameter = 55.5,axle_track = 104)
 
-
-us = UltrasonicSensor(Port.S1)
+#us = UltrasonicSensor(Port.S1)
 cs = ColorSensor(Port.S4)
 
 # global var.
@@ -42,4 +41,3 @@ twoSecBeep()
 while True:
     lineTracking()  # line tracking (parameters required)
     
-
