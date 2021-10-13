@@ -16,9 +16,6 @@ robot = DriveBase(leftWheel,rightWheel,wheel_diameter = 55.5,axle_track = 104)
 us = UltrasonicSensor(Port.S1)
 us.mode = 'US-DIST-CM'    #put the ultrasonic sensor into distance mode
 
-cs = ColorSensor(Port.S4)
-cs.mode = 'COL-REFLECT'   #put colour sensor in reflective mode
-
 # global var.
 blue = 6
 green = 12
@@ -28,7 +25,7 @@ reflection = int((green + bgColour) / 2) # light reflection btwn line and table
 LFPK = 2 # constant to speed up correction (trial-n-error)
 speed = 80 # bot/wheel speed
 objectDist = 10
-
+ev3=EV3Brick()
 
 # functions
 def lineTracking():
@@ -37,13 +34,13 @@ def lineTracking():
 
 def twoSecBeep():
     for i in range(0,2):
-        #Sound.play('sounds/Error alarm.wav') # find 'Error alarm.wav' directory
+        ev3.speaker.beep()
         time.sleep(1) # sleep for 1 sec (repeats twice - 2s)
 
 # main func.
 while True: #detects obstacle, proceeds to different colour functions
     
-    lineTracking();
+    lineTracking()
     float dist_cm = us.value()/10 #change to cm from mm
 
     if dist_cm <= objectDist : #object detected within 10cm
