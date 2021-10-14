@@ -71,8 +71,4 @@ while True: #detects obstacle, proceeds to different colour functions
             robot.straight(-500)
             robot.turn(-30)
 
-
-        else: #if the sensor does not detect a colour value equal to or lower than green, the bot will turn for another colour value
-
-    else: #does not detect obstacle, continues line tracking
-        continue
+        #else: # colour not detected, reposition to center of tape
