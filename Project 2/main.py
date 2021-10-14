@@ -57,7 +57,8 @@ while True: #detects obstacle, proceeds to different colour functions
         twoSecBeep() # beep
         
         
-        #if cs.value() <= blue :
+        if cs.value() <= blue
+            robot.turn(180)
         
         #elif cs.value() <= green : #if sensor detects a value thats equal to or less than green, 
 
