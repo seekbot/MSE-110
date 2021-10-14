@@ -25,7 +25,7 @@ bgColour = 35
 reflection = int((green + bgColour) / 2) # light reflection btwn line and table 
 LFPK = 2 # constant to speed up correction (trial-n-error)
 speed = 80 # bot/wheel speed
-objectDist = 10 # obstacle away from sensor
+objectDist = 12 # obstacle away from sensor
 
 
 # functions
@@ -56,13 +56,23 @@ while True: #detects obstacle, proceeds to different colour functions
         stopMoving() # stop 
         twoSecBeep() # beep
         
-        
-        if cs.value() <= blue
+        # obstacle removing in blue
+        if cs.reflection() <= blue:
             robot.turn(180)
-        
-        #elif cs.value() <= green : #if sensor detects a value thats equal to or less than green, 
 
-        #else: #if the sensor does not detect a colour value equal to or lower than green, the bot will turn for another colour value
+        # obstacle removing in green
+        elif cs.reflection() <= green:  
+            while dist_cm > 3: # approaches the block until 3 cm away
+                robot.drive(speed, 0) 
+                dist_cm = us.distance()/10
+            stopMoving()
+            robot.turn(30)
+            robot.straight(500)
+            robot.straight(-500)
+            robot.turn(-30)
+
+
+        else: #if the sensor does not detect a colour value equal to or lower than green, the bot will turn for another colour value
 
     else: #does not detect obstacle, continues line tracking
         continue
