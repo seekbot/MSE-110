@@ -62,17 +62,21 @@ while True: #detects obstacle, proceeds to different colour functions
         stopMoving() # stop 
         twoSecBeep() # beep
         
+        # turn toward center of line 
+        robot.turn(-15)
+
         # obstacle removing in blue
         if cs.reflection() >= blue and cs.reflection() < green:
             robot.turn(180)
 
         # obstacle removing in green
         if cs.reflection() >= green and cs.reflection() < bgColour:  
+            robot.turn(15)
             robot.straight(150)
             robot.turn(30)
             robot.straight(150)
             robot.straight(-150)
             robot.turn(-30)
-        #doesn't detect=turns little by little to find line
+        #doesn't detect turns little by little to find line
         else:
             robot.turn(3)
