@@ -89,23 +89,26 @@ while True: #detects obstacle, proceeds to different colour functions
     lineTracking()
     dist_cm = us.distance()/10 # from mm to cm
 
-    # if dist_cm <= objectDist : #object detected within 10cm
-    #     stopMoving() # stop 
-    #     twoSecBeep() # beep
+    if dist_cm <= objectDist : #object detected within 10cm
+        stopMoving() # stop 
+        twoSecBeep() # beep
         
-    #     # obstacle removing in blue
-    #     if cs.reflection() >= blue and cs.reflection() < green:
-    #         robot.turn(180)
+        #turn toward line 
+        robot.turn(-15)
+        # obstacle removing in blue
+        if cs.reflection() >= blue and cs.reflection() < green:
+            robot.turn(180)
 
-    #     # obstacle removing in green
-    #     elif cs.reflection() >= green and cs.reflection() < bgColour:  
-    #         while dist_cm > 3: # approaches the block until 3 cm away
-    #             robot.drive(speed, 0) 
-    #             dist_cm = us.distance()/10
-    #         stopMoving()
-    #         robot.turn(30)
-    #         robot.straight(500)
-    #         robot.straight(-500)
-    #         robot.turn(-30)
-
-    #     #else: # colour not detected, reposition to center of tape
+        # obstacle removing in green
+        elif cs.reflection() >= green and cs.reflection() < bgColour:  
+            while dist_cm > 3: # approaches the block until 3 cm away
+                robot.drive(speed, 0) 
+                dist_cm = us.distance()/10
+            stopMoving()
+            robot.turn(30)
+            robot.straight(500)
+            robot.straight(-500)
+            robot.turn(-30)
+        #doesn't detect=turns little by little to find line
+        else:
+            robot.turn(3)
