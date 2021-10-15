@@ -21,7 +21,7 @@ cs = ColorSensor(Port.S4)
 # global var.
 blue = 6
 green = 12
-bgColour = 35
+bgColour = 45
 
 reflection = int((green + bgColour) / 2) # light reflection btwn line and table 
 LFPK = 2 # constant to speed up correction (trial-n-error)
@@ -47,20 +47,20 @@ def lineTracking():
     robot.drive(speed,correction)
     
     # sharp turns
-    if cs.reflection() > bgColour:
+    if cs.reflection() >= bgColour:
         resetWheels()
-        stopMoving()
+        #stopMoving()
         isLeftExist = False 
-
         # search for path in left until detected
         while rightWheel.angle() < 720:
             if cs.reflection() <= reflection:
                 isLeftExist = True # path exists in left
+                stopMoving() 
+                resetWheels()
                 break
-            rightWheel.run(speed) # keep searching for line in left
 
-        stopMoving()
-        resetWheels()
+            else:
+                rightWheel.run(speed) # keep searching for line in left
 
         # search for path in right until detected
         while leftWheel.angle() < 720 and isLeftExist == False: 
@@ -72,7 +72,9 @@ def lineTracking():
                 resetWheels()
                 break
 
-            leftWheel.run(speed/2) # keep searching for the line in right
+            else:
+                leftWheel.run(speed) # keep searching for the line in right
+
 
 
 # beeps for 2 sec
