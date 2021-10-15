@@ -24,7 +24,7 @@ green = 12
 bgColour = 35
 
 threshold = int((green + bgColour) / 2) # light reflection btwn line and table 
-deviation = 2 # constant to speed up correction (trial-n-error)
+deviation = 5 # constant to speed up correction (trial-n-error)
 speed = 80 # bot/wheel speed
 objectDist = 12 # obstacle away from sensor
 
@@ -45,39 +45,7 @@ def lineTracking():
     # tracks line
     correction = (cs.reflection() - threshold) * deviation
     robot.drive(speed,correction)
-    isLeftExist = False 
     
-    # sharp turns
-    if cs.reflection() > bgColour:
-        resetWheels()
-        stopMoving()
-        # search for path in left until detected
-        while rightWheel.angle() < 720:
-            if cs.reflection() <= green:
-                isLeftExist = True # path exists in left
-                stopMoving() 
-                resetWheels()
-                break
-
-            else:
-                rightWheel.run(speed) # keep searching for line in left
-
-    # search for path in right until detected
-    while leftWheel.angle() < 720 and isLeftExist == False: 
-        if cs.reflection() <= green:
-            stopMoving()
-            resetWheels()
-
-            robot.turn(45) # re-adjust the position of robot to the track
-            resetWheels()
-            break
-
-        else:
-            leftWheel.run(speed) # keep searching for the line in right
-
-
-
-
 # beeps for 2 sec
 def twoSecBeep():
     for i in range(0,2):
