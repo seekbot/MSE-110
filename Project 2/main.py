@@ -19,7 +19,7 @@ us = UltrasonicSensor(Port.S1)
 cs = ColorSensor(Port.S4)
 
 # global var.
-blue = 7
+blue = 6
 green = 11
 bgColour = 35
 
@@ -64,6 +64,7 @@ while True: #detects obstacle, proceeds to different colour functions
         
         # turn toward center of line 
         robot.turn(-15)
+        wait(1000)
 
         # obstacle removing in blue
         if cs.reflection() >= blue and cs.reflection() < green:
