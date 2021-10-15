@@ -56,7 +56,7 @@ def twoSecBeep():
 while True: #detects obstacle, proceeds to different colour functions
     
     lineTracking()
-    dist_cm = us.distance()/10 # from mm to cm
+    dist_cm = us.distance() // 10 # from mm to cm
 
     if dist_cm <= objectDist : #object detected within 10cm
         stopMoving() # stop 
