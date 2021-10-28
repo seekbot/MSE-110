@@ -18,22 +18,32 @@ void stopMotors()
 
 task main()
 {
-	while(true)
-	{
-		datalogDataGroupStart(); // open datalog
+	int speed = 30
+	// The first argument is a datalog index number.
+	// The filename will be saved in the rc-data folder as
+	// datalog-<INDEX>.txt
+	// The format is a comma separated value file.
+	// The 2nd argument is the number of columns you wish to have in the file
+	// The 3rd argument specifies if you wish to append to the datalog ('right'),or if you want to overright ('flase').
 
-		while() //while still detecting barcode
-		{
-			wheelMove(35) // insert speed var. within ()
-			datalogAddValue(getColorReflected(CS)); //add the colour sensor values into datalog
-		}
-
-		//stop scanning and moving
-		stopMotors;
-		datalogDataGroupEnd();
-
-		//change datalog data into csv file for matlab
-		writeDebugStreamLine
-
+	datalogFlush();
+	datalogClose();
+	if (!datalogOpen(20, 2, false)){
+		displayCenteredTextLine(4,"Unable to open datalog");
 	}
+	// You can add an entry at the specified column number
+	while (nMotorEncoder(rightWheel) < 583)
+	{
+	  	datalogAddFloat(0, getMotorEncoder(rightWheel));
+	    datalogAddShort(1, getColorReflected(S2));
+	    setMotorSpeed(nMotorIndex, nSpeed);
+
+		sleep(50); // This sleep time determines how long should the robot wait before
+		// taking the next sample. It determins (affects) on the sampling rate.
+		//The larger sleep time the less sampling rate!
+	}
+	// Make sure you close the file properly
+		datalogClose();
 }
+
+//csvread
