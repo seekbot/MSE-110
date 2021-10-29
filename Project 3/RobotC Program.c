@@ -9,41 +9,32 @@ void wheelMove(float speed)
 	setMotorSpeed(leftWheel, speed);
 	setMotorSpeed(rightWheel, speed);
 }
-void stopMotors()
-{
-	setMotorSpeed(leftWheel, 0);
-	setMotorSpeed(rightWheel, 0);
-}
 
+/* global var.*/
+float spd = 30;
 
+/*main func.*/
 task main()
 {
-	int speed = 30
-	// The first argument is a datalog index number.
-	// The filename will be saved in the rc-data folder as
-	// datalog-<INDEX>.txt
-	// The format is a comma separated value file.
-	// The 2nd argument is the number of columns you wish to have in the file
-	// The 3rd argument specifies if you wish to append to the datalog ('right'),or if you want to overright ('flase').
-
+	// clear previous logs
 	datalogFlush();
 	datalogClose();
 	if (!datalogOpen(20, 2, false)){
 		displayCenteredTextLine(4,"Unable to open datalog");
 	}
+
 	// You can add an entry at the specified column number
-	while (nMotorEncoder(rightWheel) < 583)
+	while (getMotorEncoder(rightWheel) < 583)
 	{
-	  	datalogAddFloat(0, getMotorEncoder(rightWheel));
-	    datalogAddShort(1, getColorReflected(S2));
-	    setMotorSpeed(nMotorIndex, nSpeed);
+		wheelMove(spd);
+
+		datalogAddFloat(0, getMotorEncoder(rightWheel)); // CSV: Column 1 Data
+		datalogAddShort(1, getColorReflected(CS)); // CSV: Column 2 Data
 
 		sleep(50); // This sleep time determines how long should the robot wait before
 		// taking the next sample. It determins (affects) on the sampling rate.
 		//The larger sleep time the less sampling rate!
 	}
 	// Make sure you close the file properly
-		datalogClose();
+	datalogClose();
 }
-
-//csvread
