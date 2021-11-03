@@ -11,7 +11,7 @@ void wheelMove(float speed)
 }
 
 /* global var.*/
-float spd = 30;
+float spd = 2;
 
 /*main func.*/
 task main()
@@ -19,12 +19,12 @@ task main()
 	// clear previous logs
 	datalogFlush();
 	datalogClose();
-	if (!datalogOpen(20, 2, false)){
+	if (!datalogOpen(5, 2, false)){
 		displayCenteredTextLine(4,"Unable to open datalog");
 	}
 
 	// You can add an entry at the specified column number
-	while (getMotorEncoder(rightWheel) < 583)
+	while (getMotorEncoder(rightWheel) < 250)
 	{
 		wheelMove(spd);
 
