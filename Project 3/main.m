@@ -2,41 +2,44 @@ clc;
 clear all;
 close all;
 
-MyBarcode = readmatrix('sample4.csv'); 
+MyBarcode = xlsread('datalog-5.csv'); 
 %That is the values of the data in the picture are in format of 8 bit integers (maximum 255). 
 %This property will be transfered to any variables that we want to assign the value of image to that like MyRawImage
 %Therefore we need to change the variable type there after and for this reason we use the following command to change 
 %the variable types to double  
 OneLineData = double((MyBarcode(:,2)));
-plot(OneLineData)
 % %Moving Average Filter with window size of ws
- ws=12;
+for ws=7:14
 for i=1:length(OneLineData)-(ws-1)
      OneLineDataAve(i)=sum(OneLineData(i:i+(ws-1)))/ws;
 end;
-hold on
-plot(OneLineDataAve)
+
 % 
 for i=1:length(OneLineDataAve)-1
     DataAveDif(i) = abs(OneLineDataAve(i+1) - OneLineDataAve(i));
 end
-figure;
-plot(DataAveDif);
-hold on 
-%[pks,locs] = findpeaks(DataAveDif);
-%[pks,locs] = findpeaks(DataAveDif,'MinPeakHeight',17);
-[pks,locs] = findpeaks(DataAveDif,'MinPeakHeight',17,'MinPeakDistance',10);
-plot(locs,pks,'or');
+% for iMinPeakHeight = 0.2:0.1:1.0
+[pks,locs] = findpeaks(DataAveDif,'MinPeakHeight',0.5,'MinPeakDistance',4);
 
 widths = (locs(2:end)-locs(1:end-1));
-widths = floor( widths/min(widths))
+widths = round(widths/min(widths));
+for i=1:length(widths)
+    if widths(i) >= 2
+        widths(i) = 3;  
+    end
+end
+% 
+% if length(widths)== 9
+%     break
+% end
+% end
 
 %**************Patern Recognition Using Lookup Table
 LOOKUPTABLE = [311113113  %A
                113113113  %B
-               313113111  %C
-               111133113  %D
-               311133111  %E
+               212112111  %C
+               111122112  %D
+               211122111  %E
                113133111  %F
                111113313  %G
                311113311  %H
@@ -61,7 +64,23 @@ LOOKUPTABLE = [311113113  %A
                ]; 
            
 CODE = str2num(strrep(num2str(widths), ' ', ''));
-
-           
-  c = find(LOOKUPTABLE == CODE)
-  Letter = char(64+c)
+  plot(DataAveDif)
+  hold on 
+  plot(locs,pks,'or')
+  figure;
+  c = find(LOOKUPTABLE == CODE);
+  Letter = char(64+c);
+  widths
+  if c > 0
+      plot(OneLineData)
+      hold on
+      plot(OneLineDataAve)
+      figure;
+      plot(DataAveDif)
+      hold on 
+      plot(locs,pks,'or')
+      c = find(LOOKUPTABLE == CODE)
+      Letter = char(64+c)
+      break
+  end
+end
