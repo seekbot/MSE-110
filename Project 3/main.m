@@ -31,96 +31,96 @@ LOOKUPTABLE = [311113113  %A
                133131111  %Z
                ]; 
            
-MyBarcode = xlsread('datalog-5_I_Bonus.csv'); 
-OneLineData = double((MyBarcode(:,2)));
+MyBarcode = xlsread('datalog-5.csv'); % import csv datalog
+OneLineData = double((MyBarcode(:,2))); % Access the entire 2nd column
 
-% 1st run
-% %Moving Average Filter with window size of ws
-for ws=7:14
-for i=1:length(OneLineData)-(ws-1)
-     OneLineDataAve(i)=sum(OneLineData(i:i+(ws-1)))/ws;
-end;
+for ws=7:14 % Moving Avg. Filter Range
 
-% 
-for i=1:length(OneLineDataAve)-1
-    DataAveDif(i) = abs(OneLineDataAve(i+1) - OneLineDataAve(i));
-end
+	% % 1st run (1st filtering condition)
+	for i=1:length(OneLineData)-(ws-1) % Moving Avg. Filter data
+		OneLineDataAve(i)=sum(OneLineData(i:i+(ws-1)))/ws;
+	end;
+ 
+	for i=1:length(OneLineDataAve)-1 % Derivative
+		DataAveDif(i) = abs(OneLineDataAve(i+1) - OneLineDataAve(i));
+	end
 
-for vMinPeakHeight = 0.2:0.1:1.8
-[pks,locs] = findpeaks(DataAveDif,'MinPeakHeight',vMinPeakHeight,'MinPeakDistance',4);
+	for vMinPeakHeight = 0.2:0.1:1.8 % Search for all possible MinPeakHeight
+		[pks,locs] = findpeaks(DataAveDif,'MinPeakHeight',vMinPeakHeight,'MinPeakDistance',4);
 
-widths = (locs(2:end)-locs(1:end-1));
-widths = round(widths/min(widths));
+		widths = (locs(2:end)-locs(1:end-1));
+		widths = round(widths/min(widths));
 
-for i=1:length(widths)
-    if widths(i) > 2 % 1st condition
-        widths(i) = 3;  
-    else 
-        widths(i)=1;
-    end
-end
+		% filter to 1 or 3
+		for i=1:length(widths) 
+			if widths(i) > 2 % 1st condition (> 2)
+				widths(i) = 3;  
+			else 
+				widths(i)=1;
+			end
+		end
 
-if length(widths) == 9
-    CODE = str2num(strrep(num2str(widths), ' ', ''));
-     c = find(LOOKUPTABLE == CODE);
-    Letter = char(64+c);
-    
+		if length(widths) == 9 % for all widths with length of 9 char.
+			CODE = str2num(strrep(num2str(widths), ' ', ''));
+			 c = find(LOOKUPTABLE == CODE);
+			Letter = char(64+c);
+		
+			if c > 0 % If ASCII char. is found
+			  plot(OneLineData) 
+			  hold on
+			  plot(OneLineDataAve) 
+			  figure;
+			  plot(DataAveDif)
+			  hold on 
+			  plot(locs,pks,'or')
+			  c = find(LOOKUPTABLE == CODE)
+			  Letter = char(64+c)
+			  return % terminate this script if a ASCII char. is found
+			end
+		end
+	end
 
-    if c > 0 % If there is an ASCII letter
-      plot(OneLineData)
-      hold on
-      plot(OneLineDataAve)
-      figure;
-      plot(DataAveDif)
-      hold on 
-      plot(locs,pks,'or')
-      c = find(LOOKUPTABLE == CODE)
-      Letter = char(64+c)
-      return
-    end
-end
-end
-% 2nd run
-for i=1:length(OneLineData)-(ws-1)
-     OneLineDataAve(i)=sum(OneLineData(i:i+(ws-1)))/ws;
-end;
+	% % 2nd run (2nd filtering condition)
+	for i=1:length(OneLineData)-(ws-1) % Moving avg. filter data
+		OneLineDataAve(i)=sum(OneLineData(i:i+(ws-1)))/ws;
+	end;
 
-% 
-for i=1:length(OneLineDataAve)-1
-    DataAveDif(i) = abs(OneLineDataAve(i+1) - OneLineDataAve(i));
-end
+	for i=1:length(OneLineDataAve)-1 % Derivative
+		DataAveDif(i) = abs(OneLineDataAve(i+1) - OneLineDataAve(i));
+	end
 
-for vMinPeakHeight = 0.2:0.1:1.8
-[pks,locs] = findpeaks(DataAveDif,'MinPeakHeight',vMinPeakHeight,'MinPeakDistance',4);
+	for vMinPeakHeight = 0.2:0.1:1.8 % Search for all possible MinPeakHeight
+		[pks,locs] = findpeaks(DataAveDif,'MinPeakHeight',vMinPeakHeight,'MinPeakDistance',4);
 
-widths = (locs(2:end)-locs(1:end-1));
-widths = round(widths/min(widths));
+		widths = (locs(2:end)-locs(1:end-1));
+		widths = round(widths/min(widths));
 
-for i=1:length(widths)
-    if widths(i) >= 2 % 2nd condition
-        widths(i) = 3;  
-    else 
-        widths(i)=1;
-    end
-end
+		% filter to 1 or 3
+		for i=1:length(widths) 
+			if widths(i) >= 2 % 2nd condition (>= 2)
+				widths(i) = 3;  
+			else 
+				widths(i)=1;
+			end
+		end
 
-if length(widths) == 9
-    CODE = str2num(strrep(num2str(widths), ' ', ''));
-     c = find(LOOKUPTABLE == CODE);
-    Letter = char(64+c);
-    
-    if c > 0 % If there is an ASCII letter
-      plot(OneLineData)
-      hold on
-      plot(OneLineDataAve)
-      figure;
-      plot(DataAveDif)
-      hold on 
-      plot(locs,pks,'or')
-      c = find(LOOKUPTABLE == CODE)
-      Letter = char(64+c)
-      return
-    end
-end
-end
+		if length(widths) == 9
+			CODE = str2num(strrep(num2str(widths), ' ', ''));
+			 c = find(LOOKUPTABLE == CODE);
+			Letter = char(64+c);
+			
+			if c > 0 % If ASCII char. is found
+				plot(OneLineData)
+				hold on
+				plot(OneLineDataAve)
+				figure;
+				plot(DataAveDif)
+				hold on 
+				plot(locs,pks,'or')
+				c = find(LOOKUPTABLE == CODE)
+				Letter = char(64+c)
+				return % terminate this script if ASCII char. is found
+			end
+		end
+	end
 end
