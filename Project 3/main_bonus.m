@@ -46,7 +46,7 @@ for ws=7:14 % Moving Avg. Filter Range
 	end
 
 	for vMinPeakHeight = 0.2:0.1:1.8 % Search for all possible MinPeakHeight
-		for vMinPeakDistance = 1:10 % Adjust MinPeakDistance based on barcode dimensions
+		for vMinPeakDistance = 0.05:0.05:10 % Adjust MinPeakDistance based on barcode dimensions
 			[pks,locs] = findpeaks(DataAveDif,'MinPeakHeight',vMinPeakHeight,'MinPeakDistance',vMinPeakDistance);
 
 			widths = (locs(2:end)-locs(1:end-1));
@@ -93,9 +93,9 @@ for ws=7:14 % Moving Avg. Filter Range
 	end
 
 	for vMinPeakHeight = 0.2:0.1:1.8 % Search for all possible MinPeakHeight
-		for vMinPeakDistance = 1:10 % Adjust MinPeakDistance based on barcode dimensions
+		for vMinPeakDistance = 0.1:0.05:10 % Adjust MinPeakDistance based on barcode dimensions
 			[pks,locs] = findpeaks(DataAveDif,'MinPeakHeight',vMinPeakHeight,'MinPeakDistance',vMinPeakDistance);
-
+            
 			widths = (locs(2:end)-locs(1:end-1));
 			widths = round(widths/min(widths));
 
@@ -106,7 +106,7 @@ for ws=7:14 % Moving Avg. Filter Range
 				else 
 					widths(i)=1;
 				end
-			end
+            end
 
 			if length(widths) == 9
 				CODE = str2num(strrep(num2str(widths), ' ', ''));

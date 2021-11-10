@@ -11,7 +11,8 @@ void wheelMove(float speed)
 }
 
 /* global var.*/
-float spd = 2;
+int spd = 2;
+float sleepTime = 27;
 
 /*main func.*/
 task main()
@@ -24,14 +25,14 @@ task main()
 	}
 
 	// You can add an entry at the specified column number
-	while (getMotorEncoder(rightWheel) < 250)
+	while (getMotorEncoder(rightWheel) < 175)
 	{
 		wheelMove(spd);
 
 		datalogAddFloat(0, getMotorEncoder(rightWheel)); // CSV: Column 1 Data
 		datalogAddShort(1, getColorReflected(CS)); // CSV: Column 2 Data
 
-		sleep(50); // This sleep time determines how long should the robot wait before
+		sleep(sleepTime); // This sleep time determines how long should the robot wait before
 		// taking the next sample. It determins (affects) on the sampling rate.
 		//The larger sleep time the less sampling rate!
 	}
