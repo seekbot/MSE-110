@@ -1,3 +1,6 @@
+#pragma config(Sensor, S1,     US,             sensorEV3_Ultrasonic)
+#pragma config(Motor,  motorA,          right,         tmotorEV3_Large, PIDControl, encoder)
+#pragma config(Motor,  motorB,          left,          tmotorEV3_Large, PIDControl, encoder)
 /* Constant global variables */
 // EV3 Screen Dimension
 const int screenHeight =127;
@@ -36,8 +39,8 @@ int targetPosCol=0;
 void gridInit();
 void wallGen();
 void gridDraw();
-void DrawBot();
-void DisplayStartandEnd();
+void drawBot();
+void displayStartandEnd();
 
 /* main func. */
 task main()
@@ -45,7 +48,7 @@ task main()
 	gridInit();
 	wallGen();
 	while( (currentPosRow!=targetPosRow) || (currentPosCol!=targetPosCol)){
-		int temp= Solver();
+		//int temp= Solver();
 		gridDraw();
 		displayStartandEnd();
 		drawBot();
@@ -102,11 +105,11 @@ void wallGen(){
 	grid[3][0].eastWall  =1;  grid[3][1].westWall  =1;
 	grid[3][4].southWall =1;  grid[2][4].northWall  =1;
 
-	for(j=1;j<4;j++){
-		grid[2][j].northWall=1;
-		grid[2][j].southWall=1;
-		grid[3][j].southWall=1;
-		grid[1][j].northWall=1;
+	for(col=1;col<4;col++){
+		grid[2][col].northWall=1;
+		grid[2][col].southWall=1;
+		grid[3][col].southWall=1;
+		grid[1][col].northWall=1;
 	}
 }
 //=====================================================================
