@@ -25,7 +25,7 @@ cell grid[4][6];
 int robotDirection=0; // 0=North, 1=East, 2=South, 3=West
 
 // Start in the (0,0) Cell (Starting position)
-int startPosRow=0; 
+int startPosRow=0;
 int startPosCol=0;
 
 // finish/goal cell
@@ -33,7 +33,7 @@ int targetPosRow=3;
 int targetPosCol=0;
 
 // current robot position
-int currentPosRow=startPosRow; 
+int currentPosRow=startPosRow;
 int currentPosCol=startPosCol;
 
 /* func. declarations */
@@ -44,7 +44,8 @@ void gridDraw();
 void drawBot();
 void displayStartandEnd();
 
-// Physical Robot
+void turnLeft();
+void turnRight();
 
 /* main func. */
 task main()
@@ -72,19 +73,22 @@ task main()
 // turn right
 void turnRight(){
 	// Physical robot
-	setMotorTarget(leftWheel,340, 50); // Around 340 deg wheel rotation = 90 deg bot turn
+	setMotorTarget(leftWheel,355, 50); // Around 355 deg wheel rotation = 90 deg bot turn
 	waitUntilMotorStop(leftWheel);
-	
-	
+	resetMotorEncoder(leftWheel);
+
+	// EV3 Display
+
 }
 
 // turn left
 void turnLeft(){
 	// Physical robot
-	setMotorTarget(rightWheel,340, 50); // Around 340 deg wheel rotation = 90 deg bot turn
-	waitUntilMotorStop(rightWheel);
-	
-	//
+	setMotorTarget(leftWheel,-355, 50); // Around 355 deg wheel rotation = 90 deg bot turn
+	waitUntilMotorStop(leftWheel);
+	resetMotorEncoder(leftWheel);
+
+	// EV3 Display
 }
 
 //=====================================================================
