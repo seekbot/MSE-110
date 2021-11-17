@@ -1,6 +1,7 @@
 #pragma config(Sensor, S1,     US,             sensorEV3_Ultrasonic)
-#pragma config(Motor,  motorA,          right,         tmotorEV3_Large, PIDControl, encoder)
-#pragma config(Motor,  motorB,          left,          tmotorEV3_Large, PIDControl, encoder)
+#pragma config(Motor,  motorA,          leftWheel,         tmotorEV3_Large, PIDControl, encoder)
+#pragma config(Motor,  motorB,          rightWheel,          tmotorEV3_Large, PIDControl, encoder)
+
 /* Constant global variables */
 // EV3 Screen Dimension
 const int screenHeight =127;
@@ -17,30 +18,33 @@ typedef struct{
 	int southWall;
 	int westWall;
 }cell;
-
 cell grid[4][6];
 
-// Start Facing North
+/* Demo day para.*/
+// Robot Orientation (Facing direction)
 int robotDirection=0; // 0=North, 1=East, 2=South, 3=West
 
-// Start in the 0,0 Cell
-int startPosRow=0; // Starting position
+// Start in the (0,0) Cell (Starting position)
+int startPosRow=0; 
 int startPosCol=0;
 
-// current robot position
-int currentPosRow=startPosRow; // Starting position
-int currentPosCol=startPosCol;
-
-// finish/goal
+// finish/goal cell
 int targetPosRow=3;
 int targetPosCol=0;
 
+// current robot position
+int currentPosRow=startPosRow; 
+int currentPosCol=startPosCol;
+
 /* func. declarations */
+// EV3 Screen
 void gridInit();
 void wallGen();
 void gridDraw();
 void drawBot();
 void displayStartandEnd();
+
+// Physical Robot
 
 /* main func. */
 task main()
@@ -65,8 +69,23 @@ task main()
 
 }
 
+// turn right
+void turnRight(){
+	// Physical robot
+	setMotorTarget(leftWheel,340, 50); // Around 340 deg wheel rotation = 90 deg bot turn
+	waitUntilMotorStop(leftWheel);
+	
+	
+}
 
-
+// turn left
+void turnLeft(){
+	// Physical robot
+	setMotorTarget(rightWheel,340, 50); // Around 340 deg wheel rotation = 90 deg bot turn
+	waitUntilMotorStop(rightWheel);
+	
+	//
+}
 
 //=====================================================================
 void gridInit(){
