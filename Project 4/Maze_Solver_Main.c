@@ -2,25 +2,9 @@
 #pragma config(Motor,  motorA,          leftWheel,         tmotorEV3_Large, PIDControl, encoder)
 #pragma config(Motor,  motorB,          rightWheel,          tmotorEV3_Large, PIDControl, encoder)
 
-/* Constant global variables */
-// EV3 Screen Dimension
-const int screenHeight =127;
-const int screenWidth  =177;
+// Note to self: Don't forget to uncomment the 'physical robot' for actual testings
 
-// Maze Dimension (in rows # and cols #)
-const int mazeRow = 4;
-const int mazeCol = 6;
-
-// Cell Structure datatype
-typedef struct{
-	int northWall;
-	int eastWall;
-	int southWall;
-	int westWall;
-}cell;
-cell grid[4][6];
-
-/* Demo day para.*/
+/* Demo day para.(adjustable) */
 // Robot Orientation (Facing direction)
 int robotDirection=0; // 0=North, 1=East, 2=South, 3=West
 
@@ -43,52 +27,139 @@ void wallGen();
 void gridDraw();
 void drawBot();
 void displayStartandEnd();
+void screenRefresh();
 
+// EV3 Screen and/or physical robot
 void turnLeft();
 void turnRight();
+void moveFwd();
+
+
+/* Constant global variables */
+// EV3 Screen Dimension
+const int screenHeight =127;
+const int screenWidth  =177;
+
+// Maze Dimension (in rows # and cols #)
+const int mazeRow = 4;
+const int mazeCol = 6;
+
+// Other para.
+int waitTime = 1000;
+
+/* Cell Structure datatype */
+typedef struct{
+	int northWall;
+	int eastWall;
+	int southWall;
+	int westWall;
+}cell;
+
+cell grid[mazeRow][mazeCol]; // defining each cell in the maze
 
 /* main func. */
 task main()
 {
+	//set up first
 	gridInit();
 	wallGen();
-	while( (currentPosRow!=targetPosRow) || (currentPosCol!=targetPosCol)){
-		//int temp= Solver();
-		gridDraw();
-		displayStartandEnd();
-		drawBot();
-		sleep(1000);
-		eraseDisplay();
-	}
+	displayStartandEnd();
 
-	while(true){
-		displayCenteredTextLine(5,"MAZE SOLVED !!");
-		sleep(500);
-		eraseDisplay();
-		sleep(500);
-	}
+	// basic movement in EV3 screen (based on sample code starting conditions: line 7 ~ 17)
+	gridDraw();
+	drawBot();
 
+	turnRight(); // faces East (1)
+	moveFwd(); // move to (0,1)
+	moveFwd(); // move to (0,2)
+	turnLeft(); // faces North (0)
+	moveFwd(); // move to (1,2)
+	turnLeft(); // faces West (3)
+	moveFwd(); // move to (1,1)
+	moveFwd(); // move to (1,0)
+	turnRight(); // faces North (0)
+	moveFwd(); // move to (2,0)
+	moveFwd(); // move to (3,0) - target
+
+
+	//while( (currentPosRow!=targetPosRow) || (currentPosCol!=targetPosCol)){
+	//	//int temp= Solver();
+	//	gridDraw();
+	//	displayStartandEnd();
+	//	drawBot();
+	//	sleep(1000);
+	//	eraseDisplay();
+	//}
+
+	//while(true){
+	//	displayCenteredTextLine(5,"MAZE SOLVED !!");
+	//	sleep(500);
+	//	eraseDisplay();
+	//	sleep(500);
+	//}
+
+}
+/* Func. defn's */
+
+// refresh screen every time bot moves
+void screenRefresh(){
+	eraseDisplay();
+	gridDraw();
+	displayStartandEnd();
+	drawBot();
+}
+// moves forward
+void moveFwd(){
+	wait1Msec(waitTime);
+	// Physical robot
+
+	// EV3 Screen
+	if (robotDirection == 0){ // facing North (0)
+		currentPosRow++;
+	}
+	else if (robotDirection == 1){ // facing East (1)
+		currentPosCol++;
+	}
+	else if (robotDirection == 2){ // facing South (2)
+		currentPosRow--;
+	}
+	else currentPosCol--; // facing West (3)
+
+	screenRefresh(); // erases previous position after moving fwd
 }
 
 // turn right
 void turnRight(){
-	// Physical robot
-	setMotorTarget(leftWheel,355, 50); // Around 355 deg wheel rotation = 90 deg bot turn
-	waitUntilMotorStop(leftWheel);
-	resetMotorEncoder(leftWheel);
+	wait1Msec(waitTime);
+	// physical robot
+	//setMotorTarget(leftWheel,355, 50); // Around 355 deg wheel rotation = 90 deg bot turn
+	//waitUntilMotorStop(leftWheel);
+	//resetMotorEncoder(leftWheel);
 
-	// EV3 Display
+	// EV3 screen
+	if (robotDirection == 3){ // facing West (3)
+		robotDirection = 0;	// faces North (0)
+	}
+	else robotDirection++; // turn right
 
+	drawBot(); // rebuild the robot in EV3 screen
 }
 
 // turn left
 void turnLeft(){
-	// Physical robot
-	setMotorTarget(leftWheel,-355, 50); // Around 355 deg wheel rotation = 90 deg bot turn
-	waitUntilMotorStop(leftWheel);
-	resetMotorEncoder(leftWheel);
+	wait1Msec(waitTime);
+	// physical robot
+	//setMotorTarget(leftWheel,-355, 50); // Around 355 deg wheel rotation = 90 deg bot turn
+	//waitUntilMotorStop(leftWheel);
+	//resetMotorEncoder(leftWheel);
 
-	// EV3 Display
+	// EV3 screen
+	if (robotDirection == 0){ // facing North (0)
+		robotDirection = 3; // faces West (3)
+	}
+	else robotDirection--; // turn left
+
+	drawBot(); // rebuild the robot in EV3 screen
 }
 
 //=====================================================================
@@ -144,25 +215,25 @@ void gridDraw(){
 	for(int row=0;row<mazeRow;row++){
 		for(int col=0;col<mazeCol;col++){
 			if(grid[row][col].northWall==1){
-					XStart= col   *screenWidth/mazeCol;
-					YStart=(row+1)*screenHeight/mazeRow;
-					XEnd  =(col+1)*screenWidth/mazeCol;
-					YEnd  =(row+1)*screenHeight/mazeRow;
-					drawLine(XStart,YStart,XEnd,YEnd);
+				XStart= col   *screenWidth/mazeCol;
+				YStart=(row+1)*screenHeight/mazeRow;
+				XEnd  =(col+1)*screenWidth/mazeCol;
+				YEnd  =(row+1)*screenHeight/mazeRow;
+				drawLine(XStart,YStart,XEnd,YEnd);
 			}
 			if (grid[row][col].eastWall==1){
-					XStart=(col+1)*screenWidth/mazeCol;
-					YStart=(row)*screenHeight/mazeRow;
-					XEnd  =(col+1)*screenWidth/mazeCol;
-					YEnd  =(row+1)*screenHeight/mazeRow;
-					drawLine(XStart,YStart,XEnd,YEnd);
+				XStart=(col+1)*screenWidth/mazeCol;
+				YStart=(row)*screenHeight/mazeRow;
+				XEnd  =(col+1)*screenWidth/mazeCol;
+				YEnd  =(row+1)*screenHeight/mazeRow;
+				drawLine(XStart,YStart,XEnd,YEnd);
 			}
 			if (grid[row][col].westWall==1){
-					XStart= col   *screenWidth/mazeCol;
-					YStart=(row)*screenHeight/mazeRow;
-					XEnd  =(col)*screenWidth/mazeCol;
-					YEnd  =(row+1)*screenHeight/mazeRow;
-					drawLine(XStart,YStart,XEnd,YEnd);
+				XStart= col   *screenWidth/mazeCol;
+				YStart=(row)*screenHeight/mazeRow;
+				XEnd  =(col)*screenWidth/mazeCol;
+				YEnd  =(row+1)*screenHeight/mazeRow;
+				drawLine(XStart,YStart,XEnd,YEnd);
 			}
 			if(grid[row][col].southWall==1){
 				XStart= col   *screenWidth/mazeCol;
@@ -181,25 +252,25 @@ void drawBot(){
 	int robotYpixelPos=0;
 
 	if(currentPosCol==0){
-			robotXpixelPos=screenWidth/12;
+		robotXpixelPos=screenWidth/12;
 	}
 	else{
 		robotXpixelPos=(2*currentPosCol+1)*screenWidth/12;
 	}
 
 	if(currentPosRow==0){
-			robotYpixelPos=screenHeight/8;
+		robotYpixelPos=screenHeight/8;
 	}
 	else{
 		robotYpixelPos=(2*currentPosRow+1)*screenHeight/8;
 	}
 
 	switch(robotDirection){
-			case 0: displayStringAt(robotXpixelPos,robotYpixelPos,"^");	break; // Facing North
-			case 1: displayStringAt(robotXpixelPos,robotYpixelPos,">"); break; // Facing East
-			case 2: displayStringAt(robotXpixelPos,robotYpixelPos,"V"); break; // Facing South
-			case 3: displayStringAt(robotXpixelPos,robotYpixelPos,"<"); break; // Facing West
-			default: break;
+	case 0: displayStringAt(robotXpixelPos,robotYpixelPos,"^");	break; // Facing North
+	case 1: displayStringAt(robotXpixelPos,robotYpixelPos,">"); break; // Facing East
+	case 2: displayStringAt(robotXpixelPos,robotYpixelPos,"V"); break; // Facing South
+	case 3: displayStringAt(robotXpixelPos,robotYpixelPos,"<"); break; // Facing West
+	default: break;
 	}
 }
 //=====================================================================
@@ -216,14 +287,14 @@ void displayStartandEnd(){
 	int YpixelPos=0;
 
 	if(startPosCol==0){
-			XpixelPos=screenWidth/12;
+		XpixelPos=screenWidth/12;
 	}
 	else{
 		XpixelPos=(2*startPosCol+1)*screenWidth/12;
 	}
 
 	if(startPosRow==0){
-			YpixelPos=screenHeight/8;
+		YpixelPos=screenHeight/8;
 	}
 	else{
 		YpixelPos=(2*startPosRow+1)*screenHeight/8;
@@ -231,14 +302,14 @@ void displayStartandEnd(){
 	displayStringAt(XpixelPos,YpixelPos,"S");
 
 	if(targetPosCol==0){
-			XpixelPos=screenWidth/12;
+		XpixelPos=screenWidth/12;
 	}
 	else{
 		XpixelPos=(2*targetPosCol+1)*screenWidth/12;
 	}
 
 	if(targetPosRow==0){
-			YpixelPos=screenHeight/8;
+		YpixelPos=screenHeight/8;
 	}
 	else{
 		YpixelPos=(2*targetPosRow+1)*screenHeight/8;
