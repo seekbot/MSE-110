@@ -69,17 +69,10 @@ task main()
 	gridDraw();
 	drawBot();
 
-	turnRight(); // faces East (1)
-	moveFwd(); // move to (0,1)
-	moveFwd(); // move to (0,2)
-	turnLeft(); // faces North (0)
-	moveFwd(); // move to (1,2)
-	turnLeft(); // faces West (3)
-	moveFwd(); // move to (1,1)
-	moveFwd(); // move to (1,0)
-	turnRight(); // faces North (0)
-	moveFwd(); // move to (2,0)
-	moveFwd(); // move to (3,0) - target
+	// right wall follower
+	turnRight();
+	if (grid[currentPosRow][currentPosCol]){
+		}
 
 
 	//while( (currentPosRow!=targetPosRow) || (currentPosCol!=targetPosCol)){
@@ -177,18 +170,20 @@ void gridInit(){
 void wallGen(){
 	int row=0;
 	int col=0;
-
+	
+	// outer borders - left and right
 	for(row=0;row<mazeRow;row++){
 		grid[row][0].westWall=1;
 		grid[row][mazeCol - 1].eastWall=1;
 	}
-
+	
+	// outer borders - north and south
 	for(col=0;col<mazeCol;col++){
 		grid[0][col].southWall=1;
 		grid[mazeRow - 1][col].northWall=1;
 	}
 
-	// sample maze for testing
+	// sample maze for testing from here
 	grid[0][0].northWall =1;  grid[1][0].southWall =1;
 	grid[0][1].northWall =1;  grid[1][1].southWall =1;
 	grid[0][3].eastWall  =1;  grid[0][4].westWall  =1;
@@ -204,7 +199,7 @@ void wallGen(){
 		grid[2][col].southWall=1;
 		grid[3][col].southWall=1;
 		grid[1][col].northWall=1;
-	}
+	}	// till here
 }
 //=====================================================================
 void gridDraw(){
