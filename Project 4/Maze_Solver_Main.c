@@ -1,6 +1,6 @@
 #pragma config(Sensor, S1,     US,             sensorEV3_Ultrasonic)
 #pragma config(Motor,  motorA,          leftWheel,         tmotorEV3_Large, PIDControl, encoder)
-#pragma config(Motor,  motorB,          rightWheel,          tmotorEV3_Large, PIDControl, encoder)
+#pragma config(Motor,  motorD,          rightWheel,          tmotorEV3_Large, PIDControl, encoder)
 
 // Note to self: Don't forget to uncomment the 'physical robot' for actual testings
 
@@ -16,10 +16,6 @@ int startPosCol=0;
 int targetPosRow=3;
 int targetPosCol=0;
 
-// current robot position
-int currentPosRow=startPosRow;
-int currentPosCol=startPosCol;
-
 /* func. declarations */
 // EV3 Screen
 void gridInit();
@@ -33,9 +29,10 @@ void screenRefresh();
 void turnLeft();
 void turnRight();
 void moveFwd();
+void rightWallFollow();
+void resetEncoders();
 
-
-/* Constant global variables */
+/* Global var. */
 // EV3 Screen Dimension
 const int screenHeight =127;
 const int screenWidth  =177;
@@ -44,8 +41,19 @@ const int screenWidth  =177;
 const int mazeRow = 4;
 const int mazeCol = 6;
 
-// Other para.
-int waitTime = 1000;
+// current robot position
+int currentPosRow=startPosRow;
+int currentPosCol=startPosCol;
+
+// temporary robot position (for right wall follower)
+int tempPosRow = mazeRow + 1;
+int tempPosCol = mazeCol + 1;
+
+// other para.
+int waitTime = 1500;
+int wallDist = 10;
+int travelDist = 500;
+float speed = 20;
 
 /* Cell Structure datatype */
 typedef struct{
@@ -69,10 +77,14 @@ task main()
 	gridDraw();
 	drawBot();
 
-	// right wall follower
-	turnRight();
-	if (grid[currentPosRow][currentPosCol]){
-		}
+	//turnLeft();
+	//turnRight();
+	//turnRight();
+	//moveFwd();
+	// start
+	while ((currentPosRow != targetPosRow) || (currentPosCol != targetPosCol)){
+		rightWallFollow();
+	}
 
 
 	//while( (currentPosRow!=targetPosRow) || (currentPosCol!=targetPosCol)){
@@ -90,9 +102,44 @@ task main()
 	//	eraseDisplay();
 	//	sleep(500);
 	//}
-
 }
+
 /* Func. defn's */
+// right wall follower for actual bot (works for irl and remote screen)
+void rightWallFollow(){
+	if ((currentPosRow != tempPosRow) || (currentPosCol != tempPosCol)) {
+		turnRight(); // check for wall on the RHS
+		tempPosRow = currentPosRow;
+		tempPosCol = currentPosCol;
+	}
+	else{
+		// wall detected irl?
+		if (SensorValue[US] <= wallDist) {
+			if (robotDirection == 0){ // north wall there?
+				grid[currentPosRow][currentPosCol].northWall = 1;
+				turnLeft();
+			}
+			else if (robotDirection == 1){ // east wall there?
+				grid[currentPosRow][currentPosCol].eastWall = 1;
+				turnLeft();
+			}
+			else if (robotDirection == 2){ // south wall there?
+				grid[currentPosRow][currentPosCol].southWall = 1;
+				turnLeft();
+			}
+			else { // west wall there?
+				grid[currentPosRow][currentPosCol].westWall = 1;
+				turnLeft();
+			}
+		}
+
+		// no wall detected
+		else {
+			moveFwd();
+			resetEncoders();
+		}
+	}
+}
 
 // refresh screen every time bot moves
 void screenRefresh(){
@@ -103,8 +150,13 @@ void screenRefresh(){
 }
 // moves forward
 void moveFwd(){
-	wait1Msec(waitTime);
 	// Physical robot
+	moveMotorTarget(leftWheel, travelDist, speed);
+	moveMotorTarget(rightWheel, travelDist, speed);
+	waitUntilMotorStop(leftWheel);
+	waitUntilMotorStop(rightWheel);
+
+	wait1Msec(waitTime);
 
 	// EV3 Screen
 	if (robotDirection == 0){ // facing North (0)
@@ -123,11 +175,16 @@ void moveFwd(){
 
 // turn right
 void turnRight(){
-	wait1Msec(waitTime);
 	// physical robot
-	//setMotorTarget(leftWheel,355, 50); // Around 355 deg wheel rotation = 90 deg bot turn
-	//waitUntilMotorStop(leftWheel);
-	//resetMotorEncoder(leftWheel);
+	setMotorTarget(leftWheel,177.5, speed); // Around 355 deg wheel rotation = 90 deg bot turn
+	setMotorTarget(rightWheel,-177.5,speed);
+
+	waitUntilMotorStop(leftWheel);
+	waitUntilMotorStop(rightWheel);
+
+	resetEncoders();
+
+	wait1Msec(waitTime);
 
 	// EV3 screen
 	if (robotDirection == 3){ // facing West (3)
@@ -140,11 +197,16 @@ void turnRight(){
 
 // turn left
 void turnLeft(){
-	wait1Msec(waitTime);
 	// physical robot
-	//setMotorTarget(leftWheel,-355, 50); // Around 355 deg wheel rotation = 90 deg bot turn
-	//waitUntilMotorStop(leftWheel);
-	//resetMotorEncoder(leftWheel);
+	setMotorTarget(leftWheel,-177.5, speed); // Around 355 deg wheel rotation = 90 deg bot turn
+	setMotorTarget(rightWheel,177.5,speed);
+
+	waitUntilMotorStop(leftWheel);
+	waitUntilMotorStop(rightWheel);
+
+	resetEncoders();
+
+	wait1Msec(waitTime);
 
 	// EV3 screen
 	if (robotDirection == 0){ // facing North (0)
@@ -153,6 +215,13 @@ void turnLeft(){
 	else robotDirection--; // turn left
 
 	drawBot(); // rebuild the robot in EV3 screen
+}
+
+// set motor encoders to 0
+void resetEncoders()
+{
+	resetMotorEncoder(leftWheel);
+	resetMotorEncoder(rightWheel);
 }
 
 //=====================================================================
@@ -166,40 +235,41 @@ void gridInit(){
 		}
 	}
 }
+
 //=====================================================================
 void wallGen(){
 	int row=0;
 	int col=0;
-	
+
 	// outer borders - left and right
 	for(row=0;row<mazeRow;row++){
 		grid[row][0].westWall=1;
 		grid[row][mazeCol - 1].eastWall=1;
 	}
-	
+
 	// outer borders - north and south
 	for(col=0;col<mazeCol;col++){
 		grid[0][col].southWall=1;
 		grid[mazeRow - 1][col].northWall=1;
 	}
 
-	// sample maze for testing from here
-	grid[0][0].northWall =1;  grid[1][0].southWall =1;
-	grid[0][1].northWall =1;  grid[1][1].southWall =1;
-	grid[0][3].eastWall  =1;  grid[0][4].westWall  =1;
-	grid[1][2].eastWall  =1;  grid[1][3].westWall  =1;
-	grid[1][3].eastWall  =1;  grid[1][4].westWall  =1;
-	grid[1][4].eastWall  =1;  grid[1][5].westWall  =1;
-	grid[1][5].northWall =1;  grid[2][5].southWall  =1;
-	grid[3][0].eastWall  =1;  grid[3][1].westWall  =1;
-	grid[3][4].southWall =1;  grid[2][4].northWall  =1;
+	//// sample maze for testing from here
+	//grid[0][0].northWall =1;  grid[1][0].southWall =1;
+	//grid[0][1].northWall =1;  grid[1][1].southWall =1;
+	//grid[0][3].eastWall  =1;  grid[0][4].westWall  =1;
+	//grid[1][2].eastWall  =1;  grid[1][3].westWall  =1;
+	//grid[1][3].eastWall  =1;  grid[1][4].westWall  =1;
+	//grid[1][4].eastWall  =1;  grid[1][5].westWall  =1;
+	//grid[1][5].northWall =1;  grid[2][5].southWall  =1;
+	//grid[3][0].eastWall  =1;  grid[3][1].westWall  =1;
+	//grid[3][4].southWall =1;  grid[2][4].northWall  =1;
 
-	for(col=1;col<4;col++){
-		grid[2][col].northWall=1;
-		grid[2][col].southWall=1;
-		grid[3][col].southWall=1;
-		grid[1][col].northWall=1;
-	}	// till here
+	//for(col=1;col<4;col++){
+	//	grid[2][col].northWall=1;
+	//	grid[2][col].southWall=1;
+	//	grid[3][col].southWall=1;
+	//	grid[1][col].northWall=1;
+	//}	// till here
 }
 //=====================================================================
 void gridDraw(){
