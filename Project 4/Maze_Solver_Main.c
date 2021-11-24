@@ -30,6 +30,9 @@ void moveFwd();
 void rightWallFollow();
 void resetEncoders();
 
+void adjust();
+void shortestPath();
+
 /* Global var. */
 // EV3 Screen Dimension
 const int screenHeight =127;
@@ -40,8 +43,8 @@ const int mazeRow = 4;
 const int mazeCol = 6;
 
 // current robot position
-int currentPosRow=startPosRow;
-int currentPosCol=startPosCol;
+int currentPosRow = startPosRow;
+int currentPosCol = startPosCol;
 
 // temporary robot position (for right wall follower)
 int tempPosRow = mazeRow + 1;
@@ -49,9 +52,12 @@ int tempPosCol = mazeCol + 1;
 
 // other para.
 int waitTime = 1500;
-int wallDist = 10;
+int wallDist = 5;
 int travelDist = 500;
-float speed = 20;
+float speed = -20;
+int directionHistory[100];
+int tempHistory[100];
+int directionCounter = 0;
 
 /* Cell Structure datatype */
 typedef struct{
@@ -75,31 +81,13 @@ task main()
 	gridDraw();
 	drawBot();
 
-	//turnLeft();
-	//turnRight();
-	//turnRight();
-	//moveFwd();
-	// start
+	// start solving
 	while ((currentPosRow != targetPosRow) || (currentPosCol != targetPosCol)){
 		rightWallFollow();
 	}
 
-
-	//while( (currentPosRow!=targetPosRow) || (currentPosCol!=targetPosCol)){
-	//	//int temp= Solver();
-	//	gridDraw();
-	//	displayStartandEnd();
-	//	drawBot();
-	//	sleep(1000);
-	//	eraseDisplay();
-	//}
-
-	//while(true){
-	//	displayCenteredTextLine(5,"MAZE SOLVED !!");
-	//	sleep(500);
-	//	eraseDisplay();
-	//	sleep(500);
-	//}
+	// back to Start using the shortest path
+	shortestPath();
 }
 
 /* Func. defn's */
@@ -115,18 +103,22 @@ void rightWallFollow(){
 		if (SensorValue[US] <= wallDist) {
 			if (robotDirection == 0){ // north wall there?
 				grid[currentPosRow][currentPosCol].northWall = 1;
+				adjust();
 				turnLeft();
 			}
 			else if (robotDirection == 1){ // east wall there?
 				grid[currentPosRow][currentPosCol].eastWall = 1;
+				adjust();
 				turnLeft();
 			}
 			else if (robotDirection == 2){ // south wall there?
 				grid[currentPosRow][currentPosCol].southWall = 1;
+				adjust();
 				turnLeft();
 			}
 			else { // west wall there?
 				grid[currentPosRow][currentPosCol].westWall = 1;
+				adjust();
 				turnLeft();
 			}
 		}
@@ -135,7 +127,79 @@ void rightWallFollow(){
 		else {
 			moveFwd();
 			resetEncoders();
+
+			// for shortest way back
+			directionHistory[directionCounter] = robotDirection; // keeps track of bot's entire movement history
+			directionCounter++; // index for the array above
 		}
+	}
+}
+
+//move bot to center of the cell as long as there is a wall directly in front
+void adjust(){
+	wait1Msec(waitTime);
+	while (getUSDistance(US)>wallDist){
+		setMotorSpeed(leftWheel, speed);
+		setMotorSpeed(rightWheel, speed);
+	}
+	while (getUSDistance(US)<wallDist){
+		setMotorSpeed(leftWheel, -speed);
+		setMotorSpeed(rightWheel, -speed);
+	}
+	setMotorSpeed(leftWheel, 0);
+	setMotorSpeed(rightWheel, 0);
+}
+
+// shortest way back to the start
+void shortestPath(){
+	bool doubleCounter = false; // to find another dead end after finding the first one
+	int doubleDiff = 3; // for finding dead end
+	int trueCounter = 0; // for finding the size of the shortest path array
+
+	// finds deadend in the entire direction history
+	for (int i = 0; i < directionCounter + 1; i++){
+		// checking with the previous index
+		if (doubleCounter == true){
+			// another deadend found after
+			if (abs(directionHistory[i + doubleDiff] - directionHistory[i]) == 2) {
+				directionHistory[i] = 100;
+				directionHistory[i + doubleDiff] = 100;
+				i--; // check with previous index
+				doubleDiff += 2; // to find another dead end after going one index back
+			}
+
+			else { // no more dead end found
+				doubleCounter = false;
+				doubleDiff = 3;
+			}
+		}
+
+		// deadend found
+		else {
+			if(abs(directionHistory[i+1] - directionHistory[i]) == 2){
+				doubleCounter = true; // another deadend found
+				directionHistory[i] = 100;
+				directionHistory[i+1] = 100;
+				i--; // check with previous index
+			}
+		}
+	}
+
+	// eliminates the deadend
+	for (int i = 0; i < directionCounter + 1; i++){
+		// stores the shortest path direction
+		if (directionHistory[i] < 4)
+		{
+			tempHistory[trueCounter] = directionHistory[i];
+			trueCounter++;
+		}
+	}
+
+	// reverses the direction to find the way back (End -> Start)
+	int wayBack[trueCounter];
+	for (int i = 0; i < trueCounter + 1; i++)
+	{
+		wayBack[i] = tempHistory[trueCounter - i];
 	}
 }
 
@@ -146,11 +210,12 @@ void screenRefresh(){
 	displayStartandEnd();
 	drawBot();
 }
+
 // moves forward
 void moveFwd(){
 	// Physical robot
-	moveMotorTarget(leftWheel, travelDist, speed);
-	moveMotorTarget(rightWheel, travelDist, speed);
+	moveMotorTarget(leftWheel, -travelDist, speed);
+	moveMotorTarget(rightWheel, -travelDist, speed);
 	waitUntilMotorStop(leftWheel);
 	waitUntilMotorStop(rightWheel);
 
@@ -174,8 +239,8 @@ void moveFwd(){
 // turn right
 void turnRight(){
 	// physical robot
-	setMotorTarget(leftWheel,177.5, speed); // Around 355 deg wheel rotation = 90 deg bot turn
-	setMotorTarget(rightWheel,-177.5,speed);
+	setMotorTarget(leftWheel,-177.5, speed); // Around 355 deg wheel rotation = 90 deg bot turn
+	setMotorTarget(rightWheel,177.5,speed);
 
 	waitUntilMotorStop(leftWheel);
 	waitUntilMotorStop(rightWheel);
@@ -196,8 +261,8 @@ void turnRight(){
 // turn left
 void turnLeft(){
 	// physical robot
-	setMotorTarget(leftWheel,-177.5, speed); // Around 355 deg wheel rotation = 90 deg bot turn
-	setMotorTarget(rightWheel,177.5,speed);
+	setMotorTarget(leftWheel,177.5, speed); // Around 355 deg wheel rotation = 90 deg bot turn
+	setMotorTarget(rightWheel,-177.5,speed);
 
 	waitUntilMotorStop(leftWheel);
 	waitUntilMotorStop(rightWheel);
@@ -250,25 +315,8 @@ void wallGen(){
 		grid[0][col].southWall=1;
 		grid[mazeRow - 1][col].northWall=1;
 	}
-
-	//// sample maze for testing from here
-	//grid[0][0].northWall =1;  grid[1][0].southWall =1;
-	//grid[0][1].northWall =1;  grid[1][1].southWall =1;
-	//grid[0][3].eastWall  =1;  grid[0][4].westWall  =1;
-	//grid[1][2].eastWall  =1;  grid[1][3].westWall  =1;
-	//grid[1][3].eastWall  =1;  grid[1][4].westWall  =1;
-	//grid[1][4].eastWall  =1;  grid[1][5].westWall  =1;
-	//grid[1][5].northWall =1;  grid[2][5].southWall  =1;
-	//grid[3][0].eastWall  =1;  grid[3][1].westWall  =1;
-	//grid[3][4].southWall =1;  grid[2][4].northWall  =1;
-
-	//for(col=1;col<4;col++){
-	//	grid[2][col].northWall=1;
-	//	grid[2][col].southWall=1;
-	//	grid[3][col].southWall=1;
-	//	grid[1][col].northWall=1;
-	//}	// till here
 }
+
 //=====================================================================
 void gridDraw(){
 	int XStart=0;
@@ -336,13 +384,6 @@ void drawBot(){
 	default: break;
 	}
 }
-//=====================================================================
-//int Solver(){
-//	?????????
-//	?????????
-//	?????????
-//	?????????
-//}
 
 //=====================================================================
 void displayStartandEnd(){
