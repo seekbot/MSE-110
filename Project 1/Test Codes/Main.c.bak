@@ -101,9 +101,9 @@ task main()
 	// back to Start using the shortest path via wayBack array
 	shortestPath();
 	back2Start();
-
+	
 	wait1Msec(waitTime);
-
+	
 	displayCenteredTextLine(5,"BACK TO START!!");
 }
 
@@ -227,14 +227,14 @@ void shortestPath(){
 		}
 	}
 }
-//have bot move through the shortest path back to the start
+//have bot move through the shortest path back to the start 
 void back2Start(){
 
 	for(int i = 0; i < wayBackIndex; i++){
 		while(robotDirection != wayBack[i]){ //make robot face in the correct direction
 			turnRight();
 		}
-
+		
 		moveFwd();
 	}
 }
