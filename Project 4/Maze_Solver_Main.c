@@ -62,7 +62,7 @@ int directionHistory[100];
 int tempHistory[100];
 int directionCounter = 0;
 
-int wayBack[50]; // stores the reverse direction in array
+int wayBack[100]; // stores the reverse direction in array
 int wayBackIndex = 0; // index of array above
 
 /* Cell Structure datatype */
@@ -94,7 +94,7 @@ task main()
 	// maze solved
 	for (int i = 1; i < 3; i++)
 	{
-		playSoundFile("Error alarm");
+		playSoundFile("Error alarm"); // Use a different sound
 		sleep(1000);
 	}
 
@@ -104,7 +104,8 @@ task main()
 
 	wait1Msec(waitTime);
 
-	displayCenteredTextLine(5,"BACK TO START!!");
+	displayCenteredTextLine(5,"WELCOME BACK!!");
+	wait1Msec(waitTime);
 }
 
 /* Func. defn's */
@@ -170,17 +171,17 @@ void adjust(){
 	wait1Msec(waitTime);
 }
 
-// shortest way back to the start
+// shortest way back to the start in array
 void shortestPath(){
-	bool doubleCounter = false; // to find another dead end after finding the first one
-	int doubleDiff = 3; // for finding dead end
+	bool doubleCounter = false; // to find another dead end after finding the first one and so on...
+	int doubleDiff = 3; // for finding another dead end(s)
 
 	// finds deadend in the entire direction history
 	for (int i = 0; i < directionCounter - 1; i++){
 		// checking with the previous index
 		if (doubleCounter == false){
 			if(abs(directionHistory[i+1] - directionHistory[i]) == 2){
-				doubleCounter = true; // another deadend found
+				doubleCounter = true; // find another deadend(s) 
 				directionHistory[i] = 100;
 				directionHistory[i+1] = 100;
 				i--; // check with previous index
@@ -202,11 +203,11 @@ void shortestPath(){
 		}
 	}
 
-	int trueCounter = 0; // for finding the size of the shortest path array
+	int trueCounter = 0; // used as an index of the shortest path array
 
 	// eliminates the deadend
 	for (int i = 0; i < directionCounter; i++){
-		// stores the shortest path direction
+		// stores the shortest path direction (Start -> End)
 		if (directionHistory[i] < 4)
 		{
 			tempHistory[trueCounter] = directionHistory[i];
@@ -227,6 +228,7 @@ void shortestPath(){
 		}
 	}
 }
+
 //have bot move through the shortest path back to the start
 void back2Start(){
 
@@ -239,6 +241,7 @@ void back2Start(){
 		moveFwd();
 	}
 }
+
 // refresh screen every time bot moves
 void screenRefresh(){
 	eraseDisplay();
