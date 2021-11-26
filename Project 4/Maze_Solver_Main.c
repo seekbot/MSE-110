@@ -233,6 +233,7 @@ void back2Start(){
 	for(int i = 0; i < wayBackIndex; i++){
 		while(robotDirection != wayBack[i]){ //make robot face in the correct direction
 			turnRight();
+			wait1Msec(waitTime);
 		}
 
 		moveFwd();
