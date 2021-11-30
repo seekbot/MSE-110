@@ -9,12 +9,12 @@
 int robotDirection = 0; // 0=North, 1=East, 2=South, 3=West
 
 // Start in the (0,0) Cell (Starting position)
-int startPosRow = 0;
-int startPosCol = 2;
+int startPosRow = 1;
+int startPosCol = 1;
 
 // finish/goal cell
-int targetPosRow = 2;
-int targetPosCol = 4;
+int targetPosRow = 0;
+int targetPosCol = 3;
 
 /* func. declarations */
 // EV3 Screen
@@ -55,15 +55,16 @@ int tempPosCol = mazeCol + 1;
 
 // other para.
 int waitTime = 1000;
-int adjustSpeed = 30;
-int wallDist = 12;
-int travelDist = 530;
-float speed = -40;
-float turningSpeed = -60;
+float adjustSpeed1 = 60;
+float adjustSpeed2 = 30;
+int wallDist = 10;
+int travelDist = 540;
+float speed = -60;
+float turningSpeed = -50;
 int directionHistory[100];
 int tempHistory[100];
 int directionCounter = 0;
-float encoderTurn = 233.5;
+float encoderTurn = 240;  //233.5
 
 int wayBack[100]; // stores the reverse direction in array
 int wayBackIndex = 0; // index of array above
@@ -148,6 +149,10 @@ void rightWallFollow(){
 		// no wall detected
 		else {
 			moveFwd();
+			if(getUSDistance(US)<=wallDist)
+			{
+				adjust();
+			}
 			resetEncoders();
 
 			// for shortest way back
@@ -161,16 +166,16 @@ void rightWallFollow(){
 void adjust(){
 
 	while(getTouchValue(TS)== 0){ // not being pushed
-		setMotorSpeed(leftWheel, -adjustSpeed);
-		setMotorSpeed(rightWheel, -adjustSpeed);
+		setMotorSpeed(leftWheel, -adjustSpeed1);
+		setMotorSpeed(rightWheel, -adjustSpeed1);
 	}
 
 	wait1Msec(waitTime);
 	resetEncoders();
 
 	while (nMotorEncoder[leftWheel] < 100){ // adjust back by moving backward
-		setMotorSpeed(leftWheel, adjustSpeed);
-		setMotorSpeed(rightWheel, adjustSpeed);
+		setMotorSpeed(leftWheel, adjustSpeed2);
+		setMotorSpeed(rightWheel, adjustSpeed2);
 	}
 
 	setMotorSpeed(leftWheel, 0);
@@ -235,14 +240,43 @@ void shortestPath(){
 
 //have bot move through the shortest path back to the start
 void back2Start(){
+	// 180 Degrees turn
+	turnRight();
+	turnRight();
 
-	for(int i = 0; i < wayBackIndex; i++){
-		while(robotDirection != wayBack[i]){ //make robot face in the correct direction
-			turnRight();
-			wait1Msec(waitTime);
+	for(int i = 0; i < wayBackIndex; i++)
+	{
+		while(robotDirection != wayBack[i])
+		{ //make robot face in the correct direction
+			if (robotDirection + 1 == wayBack[i])  
+			{
+				turnRight();	
+			}
+			else if (robotDirection - 1 == wayBack[i])
+			{
+				turnLeft();	
+			}
+			else 
+			{
+				if (wayBack[i] == 0)
+				{
+					turnRight();   //from west (3) to north (0)
+				}
+
+				else 
+				{
+					turnLeft(); // from north (0) to west (3)
+				}
+			}
 		}
-		moveFwd();
+
 		wait1Msec(waitTime);
+		moveFwd();
+
+		if(getUSDistance(US)<=wallDist)
+		{
+			adjust();
+		}
 	}
 }
 
