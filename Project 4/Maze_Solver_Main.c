@@ -6,15 +6,15 @@
 
 /* Demo day para.(adjustable) */
 // Robot Orientation (Facing direction)
-int robotDirection = 0; // 0=North, 1=East, 2=South, 3=West
+int robotDirection = 3; // 0=North, 1=East, 2=South, 3=West
 
 // Start in the (0,0) Cell (Starting position)
-int startPosRow = 1;
-int startPosCol = 1;
+int startPosRow = 3;
+int startPosCol = 5;
 
 // finish/goal cell
-int targetPosRow = 0;
-int targetPosCol = 3;
+int targetPosRow = 3;
+int targetPosCol = 1;
 
 /* func. declarations */
 // EV3 Screen
@@ -54,20 +54,21 @@ int tempPosRow = mazeRow + 1;
 int tempPosCol = mazeCol + 1;
 
 // other para.
-int waitTime = 1000;
-float adjustSpeed1 = 60;
-float adjustSpeed2 = 30;
-int wallDist = 10;
-int travelDist = 540;
-float speed = -60;
-float turningSpeed = -50;
 int directionHistory[100];
 int tempHistory[100];
-int directionCounter = 0;
-float encoderTurn = 240;  //233.5
-
 int wayBack[100]; // stores the reverse direction in array
 int wayBackIndex = 0; // index of array above
+
+int waitTime = 500;
+float adjustSpeed1 = 70;
+float adjustSpeed2 = 30;
+int wallDist = 13;
+int travelDist = 525;
+float speed = -50;
+float turningSpeed = -45;
+int directionCounter = 0;
+float encoderTurn = 190;
+int adjustEncoder = 100;
 
 /* Cell Structure datatype */
 typedef struct{
@@ -90,17 +91,17 @@ task main()
 	// basic movement in EV3 screen (based on sample code starting conditions: line 7 ~ 17)
 	gridDraw();
 	drawBot();
+	
 
 	// start solving
 	while ((currentPosRow != targetPosRow) || (currentPosCol != targetPosCol)){
 		rightWallFollow();
 	}
+
 	// maze solved
-	for (int i = 1; i < 3; i++)
-	{
-		playSoundFile("Error alarm"); // Use a different sound
-		sleep(1000);
-	}
+	playSoundFile("Bravo");
+	sleep(1000);
+
 
 	// back to Start using the shortest path via wayBack array
 	shortestPath();
@@ -149,7 +150,7 @@ void rightWallFollow(){
 		// no wall detected
 		else {
 			moveFwd();
-			if(getUSDistance(US)<=wallDist)
+			if(getUSDistance(US)<= wallDist)
 			{
 				adjust();
 			}
@@ -173,7 +174,7 @@ void adjust(){
 	wait1Msec(waitTime);
 	resetEncoders();
 
-	while (nMotorEncoder[leftWheel] < 100){ // adjust back by moving backward
+	while (nMotorEncoder[leftWheel] < adjustEncoder){ // adjust back by moving backward
 		setMotorSpeed(leftWheel, adjustSpeed2);
 		setMotorSpeed(rightWheel, adjustSpeed2);
 	}
@@ -248,22 +249,22 @@ void back2Start(){
 	{
 		while(robotDirection != wayBack[i])
 		{ //make robot face in the correct direction
-			if (robotDirection + 1 == wayBack[i])  
+			if (robotDirection + 1 == wayBack[i])
 			{
-				turnRight();	
+				turnRight();
 			}
 			else if (robotDirection - 1 == wayBack[i])
 			{
-				turnLeft();	
+				turnLeft();
 			}
-			else 
+			else
 			{
 				if (wayBack[i] == 0)
 				{
 					turnRight();   //from west (3) to north (0)
 				}
 
-				else 
+				else
 				{
 					turnLeft(); // from north (0) to west (3)
 				}
@@ -292,7 +293,7 @@ void screenRefresh(){
 void moveFwd(){
 	// Physical robot
 	setMotorSyncEncoder(leftWheel, rightWheel, 0, travelDist, speed);
-	wait1Msec(waitTime);
+	wait1Msec(1000);
 
 	resetEncoders();
 	wait1Msec(waitTime);
