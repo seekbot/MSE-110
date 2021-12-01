@@ -10,7 +10,7 @@ int robotDirection = 3; // 0=North, 1=East, 2=South, 3=West
 
 // Start in the (0,0) Cell (Starting position)
 int startPosRow = 3;
-int startPosCol = 5;
+int startPosCol = 4;
 
 // finish/goal cell
 int targetPosRow = 3;
@@ -59,15 +59,16 @@ int tempHistory[100];
 int wayBack[100]; // stores the reverse direction in array
 int wayBackIndex = 0; // index of array above
 
-int waitTime = 500;
+int waitTime = 525;
 float adjustSpeed1 = 70;
 float adjustSpeed2 = 30;
 int wallDist = 13;
-int travelDist = 525;
+int travelDist = 500;
 float speed = -50;
-float turningSpeed = -45;
+float turningSpeed = -65;
 int directionCounter = 0;
-float encoderTurn = 190;
+float encoderTurnRight = 230;
+float encoderTurnLeft = 239;
 int adjustEncoder = 100;
 
 /* Cell Structure datatype */
@@ -91,7 +92,7 @@ task main()
 	// basic movement in EV3 screen (based on sample code starting conditions: line 7 ~ 17)
 	gridDraw();
 	drawBot();
-	
+
 
 	// start solving
 	while ((currentPosRow != targetPosRow) || (currentPosCol != targetPosCol)){
@@ -137,23 +138,25 @@ void rightWallFollow(){
 			}
 			else if (robotDirection == 2){ // south wall there?
 				grid[currentPosRow][currentPosCol].southWall = 1;
-				adjust();
 				turnLeft();
+				adjust();
 			}
 			else { // west wall there?
 				grid[currentPosRow][currentPosCol].westWall = 1;
 				adjust();
 				turnLeft();
 			}
+			wait1Msec(waitTime);
 		}
 
 		// no wall detected
 		else {
 			moveFwd();
-			if(getUSDistance(US)<= wallDist)
-			{
-				adjust();
-			}
+			wait1Msec(waitTime);
+			//if(getUSDistance(US)<= wallDist)
+			//{
+			//	adjust();
+			//}
 			resetEncoders();
 
 			// for shortest way back
@@ -166,12 +169,11 @@ void rightWallFollow(){
 //move bot to center of the cell as long as there is a wall directly in front
 void adjust(){
 
-	while(getTouchValue(TS)== 0){ // not being pushed
-		setMotorSpeed(leftWheel, -adjustSpeed1);
-		setMotorSpeed(rightWheel, -adjustSpeed1);
-	}
+	// not being pushed
+	setMotorSpeed(leftWheel, -adjustSpeed1);
+	setMotorSpeed(rightWheel, -adjustSpeed1);
 
-	wait1Msec(waitTime);
+	wait1Msec(2 * waitTime);
 	resetEncoders();
 
 	while (nMotorEncoder[leftWheel] < adjustEncoder){ // adjust back by moving backward
@@ -243,6 +245,7 @@ void shortestPath(){
 void back2Start(){
 	// 180 Degrees turn
 	turnRight();
+	// maybe wait
 	turnRight();
 
 	for(int i = 0; i < wayBackIndex; i++)
@@ -317,7 +320,7 @@ void moveFwd(){
 // turn right
 void turnRight(){
 	// physical robot
-	setMotorSyncEncoder(leftWheel, rightWheel, 100, encoderTurn, turningSpeed); // 100 means turn right
+	setMotorSyncEncoder(leftWheel, rightWheel, 100, encoderTurnRight, turningSpeed); // 100 means turn right
 	wait1Msec(waitTime);
 
 	resetEncoders();
@@ -336,7 +339,7 @@ void turnRight(){
 // turn left
 void turnLeft(){
 	// physical robot
-	setMotorSyncEncoder(leftWheel, rightWheel, -100, encoderTurn, turningSpeed); // -100 means turn left
+	setMotorSyncEncoder(leftWheel, rightWheel, -100, encoderTurnLeft, turningSpeed); // -100 means turn left
 	wait1Msec(waitTime);
 
 	resetEncoders();
