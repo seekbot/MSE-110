@@ -5,15 +5,15 @@
 
 /* Demo day para.(adjustable) */
 // Robot Orientation (Facing direction)
-int robotDirection = 3; // 0=North, 1=East, 2=South, 3=West
+int robotDirection = 2; // 0=North, 1=East, 2=South, 3=West
 
 // Start in the (0,0) Cell (Starting position)
-int startPosRow = 3;
-int startPosCol = 4;
+int startPosRow = 1;
+int startPosCol = 2;
 
 // finish/goal cell
 int targetPosRow = 3;
-int targetPosCol = 1;
+int targetPosCol = 2;
 
 /* func. declarations */
 // EV3 Screen
@@ -62,13 +62,12 @@ int waitTime = 525;
 float adjustSpeed1 = 70;
 float adjustSpeed2 = 30;
 int wallDist = 13;
-int travelDist = 500;
+int travelDist = 520;
 float speed = -40;
 float turningSpeed = -45;
 int directionCounter = 0;
-float encoderTurnRight = 218;
-float encoderTurnLeft = 218;
-int adjustEncoder = 100;
+int turnEncoder = 175;
+int adjustEncoder = 120;
 
 /* Cell Structure datatype */
 typedef struct{
@@ -152,10 +151,10 @@ void rightWallFollow(){
 		else {
 			moveFwd();
 			wait1Msec(waitTime);
-			//if(getUSDistance(US)<= wallDist)
-			//{
-			//	adjust();
-			//}
+			if(getUSDistance(US)<= wallDist)
+			{
+				adjust();
+			}
 			resetEncoders();
 
 			// for shortest way back
@@ -319,10 +318,14 @@ void moveFwd(){
 // turn right
 void turnRight(){
 	// physical robot
-	setMotorSyncEncoder(leftWheel, rightWheel, 100, encoderTurnRight, turningSpeed); // 100 means turn right
-	wait1Msec(waitTime);
-
 	resetEncoders();
+	while(getMotorEncoder(rightWheel)< turnEncoder)
+	{
+		setMotorSpeed(leftWheel,-20);
+		setMotorSpeed(rightWheel,20);
+	}
+	setMotorSpeed(leftWheel,0);
+	setMotorSpeed(rightWheel,0);
 
 	wait1Msec(waitTime);
 
@@ -338,10 +341,14 @@ void turnRight(){
 // turn left
 void turnLeft(){
 	// physical robot
-	setMotorSyncEncoder(leftWheel, rightWheel, -100, encoderTurnLeft, turningSpeed); // -100 means turn left
-	wait1Msec(waitTime);
-
 	resetEncoders();
+	while(getMotorEncoder(leftWheel)< turnEncoder)
+	{
+		setMotorSpeed(leftWheel,20);
+		setMotorSpeed(rightWheel,-20);
+	}
+	setMotorSpeed(leftWheel,0);
+	setMotorSpeed(rightWheel,0);
 
 	wait1Msec(waitTime);
 
