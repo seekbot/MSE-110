@@ -1,3 +1,4 @@
+#pragma config(Sensor, S3,     GS,             sensorEV3_Gyro)
 #pragma config(Sensor, S4,     US,             sensorEV3_Ultrasonic)
 #pragma config(Motor,  motorA,          leftWheel,     tmotorEV3_Large, PIDControl, driveLeft, encoder)
 #pragma config(Motor,  motorD,          rightWheel,    tmotorEV3_Large, PIDControl, driveRight, encoder)
@@ -5,15 +6,15 @@
 
 /* Demo day para.(adjustable) */
 // Robot Orientation (Facing direction)
-int robotDirection = 2; // 0=North, 1=East, 2=South, 3=West
+int robotDirection = 0; // 0=North, 1=East, 2=South, 3=West
 
 // Start in the (0,0) Cell (Starting position)
-int startPosRow = 1;
-int startPosCol = 2;
+int startPosRow = 2;
+int startPosCol = 3;
 
 // finish/goal cell
-int targetPosRow = 3;
-int targetPosCol = 2;
+int targetPosRow = 0;
+int targetPosCol = 3;
 
 /* func. declarations */
 // EV3 Screen
@@ -58,16 +59,16 @@ int tempHistory[100];
 int wayBack[100]; // stores the reverse direction in array
 int wayBackIndex = 0; // index of array above
 
-int waitTime = 525;
+int waitTime = 1000;
 float adjustSpeed1 = 70;
 float adjustSpeed2 = 30;
 int wallDist = 13;
-int travelDist = 520;
+int travelDist = 515;
 float speed = -40;
-float turningSpeed = -45;
 int directionCounter = 0;
-int turnEncoder = 175;
-int adjustEncoder = 120;
+int turnRightEncoder = 175;
+int turnLeftEncoder = 165;
+int adjustEncoder = 100;
 
 /* Cell Structure datatype */
 typedef struct{
@@ -82,7 +83,10 @@ cell grid[mazeRow][mazeCol]; // defining each cell in the maze
 /* main func. */
 task main()
 {
-	//set up first
+	resetGyro(GS);
+	sleep(2500);
+
+	//set up matrix
 	gridInit();
 	wallGen();
 	displayStartandEnd();
@@ -90,7 +94,6 @@ task main()
 	// basic movement in EV3 screen (based on sample code starting conditions: line 7 ~ 17)
 	gridDraw();
 	drawBot();
-
 
 	// start solving
 	while ((currentPosRow != targetPosRow) || (currentPosCol != targetPosCol)){
@@ -151,10 +154,10 @@ void rightWallFollow(){
 		else {
 			moveFwd();
 			wait1Msec(waitTime);
-			if(getUSDistance(US)<= wallDist)
-			{
-				adjust();
-			}
+			//if(getUSDistance(US)<= wallDist)
+			//{
+			//	adjust();
+			//}
 			resetEncoders();
 
 			// for shortest way back
@@ -171,7 +174,7 @@ void adjust(){
 	setMotorSpeed(leftWheel, -adjustSpeed1);
 	setMotorSpeed(rightWheel, -adjustSpeed1);
 
-	wait1Msec(2 * waitTime);
+	wait1Msec(2 * 525);
 	resetEncoders();
 
 	while (nMotorEncoder[leftWheel] < adjustEncoder){ // adjust back by moving backward
@@ -319,11 +322,13 @@ void moveFwd(){
 void turnRight(){
 	// physical robot
 	resetEncoders();
-	while(getMotorEncoder(rightWheel)< turnEncoder)
-	{
+	int init = getGyroDegrees(GS);
+
+	while (getGyroDegrees(GS) < init + 85){
 		setMotorSpeed(leftWheel,-20);
 		setMotorSpeed(rightWheel,20);
 	}
+
 	setMotorSpeed(leftWheel,0);
 	setMotorSpeed(rightWheel,0);
 
@@ -342,11 +347,13 @@ void turnRight(){
 void turnLeft(){
 	// physical robot
 	resetEncoders();
-	while(getMotorEncoder(leftWheel)< turnEncoder)
-	{
+	int init = getGyroDegrees(GS);
+
+	while (getGyroDegrees(GS) > init - 85){
 		setMotorSpeed(leftWheel,20);
 		setMotorSpeed(rightWheel,-20);
 	}
+
 	setMotorSpeed(leftWheel,0);
 	setMotorSpeed(rightWheel,0);
 
